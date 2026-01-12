@@ -1,0 +1,10 @@
+# Compiler output
+*.hex
+
+# Foundry
+cache/
+out/
+lib/
+
+# Node
+node_modules/
