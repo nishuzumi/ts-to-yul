@@ -2772,15 +2772,14 @@ export class Transformer {
       params: ["data"],
       returns: ["value"],
       body: [
-        // Skip length prefix (32 bytes) and load first value
-        // value := mload(add(data, 32))
+        // value := mload(add(data, 0))
         {
           type: "assignment",
           names: ["value"],
           value: {
             type: "functionCall",
             name: "mload",
-            args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "data" }, { type: "literal", value: 32n }] }],
+            args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "data" }, { type: "literal", value: 0n }] }],
           },
         },
       ],
@@ -8713,13 +8712,13 @@ export class Transformer {
   /**
    * Generate __abi_decode_N helper for decoding N values from ABI-encoded data
    * __abi_decode_N(data) -> (v0, v1, ...)
-   * Each value is at data + 32*(i+1) (skip length prefix)
+   * Each value is at data + 32*i (raw ABI data, no length prefix)
    */
   private generateAbiDecodeNHelper(n: number): YulStatement {
     const returns = Array.from({ length: n }, (_, i) => `v${i}`);
     const body: YulStatement[] = [];
 
-    // Decode each value: v_i := mload(add(data, 32*(i+1)))
+    // Decode each value: v_i := mload(add(data, 32*i))
     for (let i = 0; i < n; i++) {
       body.push({
         type: "assignment",
@@ -8728,7 +8727,7 @@ export class Transformer {
           type: "functionCall",
           name: "mload",
           args: [
-            { type: "functionCall", name: "add", args: [{ type: "identifier", name: "data" }, { type: "literal", value: BigInt((i + 1) * 32) }] },
+            { type: "functionCall", name: "add", args: [{ type: "identifier", name: "data" }, { type: "literal", value: BigInt(i * 32) }] },
           ],
         },
       });

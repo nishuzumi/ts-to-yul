@@ -92,6 +92,21 @@ describe("ABI Encoding", () => {
       expect(result.errors).toHaveLength(0);
       expect(result.yul).toContain("__abi_decode");
     });
+
+    it("should load decoded values starting at data + 0 (no length prefix)", () => {
+      const source = `
+        export class Test {
+          public decode(data: u256): u256 {
+            const value: u256 = abi.decode(data, ["uint256"]);
+            return value;
+          }
+        }
+      `;
+      const result = compileToYul(source);
+      expect(result.errors).toHaveLength(0);
+      // abi.decode input is raw ABI data; first value should be at data + 0
+      expect(result.yul).toContain("mload(add(data, 0))");
+    });
   });
 
   describe("Signed Integer Encoding", () => {
