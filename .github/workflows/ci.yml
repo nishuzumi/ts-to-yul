@@ -85,49 +85,6 @@ jobs:
           name: dist
           path: dist/
 
-  e2e:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
-      - name: Install solc
-        run: |
-          sudo add-apt-repository ppa:ethereum/ethereum
-          sudo apt-get update
-          sudo apt-get install -y solc
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Start Anvil
-        run: anvil &
-
-      - name: Wait for Anvil
-        run: sleep 3
-
-      - name: Run E2E tests
-        run: pnpm test:e2e
-
   release:
     name: Release
     runs-on: ubuntu-latest

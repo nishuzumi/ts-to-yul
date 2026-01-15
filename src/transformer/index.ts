@@ -1,16 +1,12 @@
 import {
   ClassDeclaration,
   MethodDeclaration,
-  ConstructorDeclaration,
   FunctionDeclaration,
   PropertyDeclaration,
   Node,
   SyntaxKind,
   PropertyAccessExpression,
   BinaryExpression,
-  Identifier,
-  NumericLiteral,
-  BigIntLiteral,
   ReturnStatement,
   ExpressionStatement,
   IfStatement,
@@ -1068,7 +1064,6 @@ export class Transformer {
         // Single inheritance - traverse up the chain
         let currentClass = classDecl;
         const extendsChainLocal: ClassDeclaration[] = [];
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while (true) {
           const ext = currentClass.getExtends();
           if (!ext) break;
@@ -1111,7 +1106,7 @@ export class Transformer {
       for (const namedImport of namedImports) {
         if (namedImport.getName() === className) {
           // Found the import, resolve the source file
-          const moduleSpecifier = importDecl.getModuleSpecifierValue();
+          const _moduleSpecifier = importDecl.getModuleSpecifierValue();
           const importedSourceFile = importDecl.getModuleSpecifierSourceFile();
 
           if (importedSourceFile) {
@@ -1890,14 +1885,14 @@ export class Transformer {
 
     // Generate library functions
     for (const [libName, libInfo] of this.libraries) {
-      for (const [methodName, methodInfo] of libInfo.methods) {
+      for (const [_methodName, methodInfo] of libInfo.methods) {
         const libFunc = this.generateLibraryFunction(libName, methodInfo);
         statements.push(libFunc);
       }
     }
 
     // Generate imported standalone functions
-    for (const [funcName, funcInfo] of this.importedFunctions) {
+    for (const [_funcName, funcInfo] of this.importedFunctions) {
       const importedFunc = this.generateImportedFunction(funcInfo);
       statements.push(importedFunc);
     }
@@ -9580,7 +9575,7 @@ export class Transformer {
   private inferExpressionType(node: Node): string | null {
     // Identifier - look up type from variable declarations or parameters
     if (Node.isIdentifier(node)) {
-      const name = node.getText();
+      const _name = node.getText();
 
       // Check if it's a local variable
       const symbol = node.getSymbol();
