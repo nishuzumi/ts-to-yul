@@ -3,6 +3,7 @@ import {
   u128,
   u160,
   i24,
+  i256,
   address,
   storage,
   msg,
@@ -31,6 +32,10 @@ export class UniswapV3Pool {
   // Min and max ticks
   private MIN_TICK: i24 = -887272n;
   private MAX_TICK: i24 = 887272n;
+
+  // Min and max sqrt ratios (from Uniswap V3 TickMath.sol)
+  private MIN_SQRT_RATIO: u160 = 4295128739n;
+  private MAX_SQRT_RATIO: u160 = 1461446703485210103287273052203988822378723970342n;
 
   // ============ Pool State ============
 
@@ -67,7 +72,12 @@ export class UniswapV3Pool {
 
   @view
   public slot0(): [u160, i24, u256] {
-    return [this.sqrtPriceX96, this.tick, this.fee];
+    // Sign-extend tick from i24 to i256 for proper ABI encoding
+    let tick: i256 = this.tick;
+    asm`
+      ${tick} := signextend(2, ${tick})
+    `;
+    return [this.sqrtPriceX96, tick, this.fee];
   }
 
   @view
@@ -101,6 +111,14 @@ export class UniswapV3Pool {
 
     if (sqrtPriceX96_ === 0n) {
       revert("IP");
+    }
+
+    // Check price bounds
+    if (sqrtPriceX96_ < this.MIN_SQRT_RATIO) {
+      revert("R");
+    }
+    if (sqrtPriceX96_ >= this.MAX_SQRT_RATIO) {
+      revert("R");
     }
 
     this.sqrtPriceX96 = sqrtPriceX96_;
@@ -356,15 +374,14 @@ export class UniswapV3Pool {
   }
 
   // ============ Internal Math Functions ============
+  // Ported from Uniswap V3 TickMath.sol
+  // https://github.com/Uniswap/v3-core/blob/main/contracts/libraries/TickMath.sol
 
   /**
-   * Get sqrt ratio at tick (simplified)
+   * Get sqrt ratio at tick - O(1) using bit operations and pre-computed constants
+   * Calculates sqrt(1.0001^tick) * 2^96
    */
   private _getSqrtRatioAtTick(tick: i24): u160 {
-    if (tick === 0n) {
-      return this.Q96;
-    }
-
     let absTick: u256 = 0n;
     if (tick < 0n) {
       absTick = 0n - tick;
@@ -372,51 +389,263 @@ export class UniswapV3Pool {
       absTick = tick;
     }
 
-    let ratio: u256 = this.Q96;
+    // Start with Q128 (1 << 128)
+    let ratio: u256 = 0x100000000000000000000000000000000n;
 
-    // Approximate sqrt(1.0001^tick)
-    let i: u256 = 0n;
-    while (i < absTick && i < 500n) {
-      if (tick > 0n) {
-        ratio = (ratio * 100005n) / 100000n;
-      } else {
-        ratio = (ratio * 100000n) / 100005n;
-      }
-      i = i + 1n;
+    // Multiply by pre-computed constants based on bits of absTick
+    // Each constant is sqrt(1.0001^(2^n)) in Q128 format
+    if ((absTick & 0x1n) !== 0n) {
+      ratio = (ratio * 0xfffcb933bd6fad37aa2d162d1a594001n) >> 128n;
+    }
+    if ((absTick & 0x2n) !== 0n) {
+      ratio = (ratio * 0xfff97272373d413259a46990580e213an) >> 128n;
+    }
+    if ((absTick & 0x4n) !== 0n) {
+      ratio = (ratio * 0xfff2e50f5f656932ef12357cf3c7fdccn) >> 128n;
+    }
+    if ((absTick & 0x8n) !== 0n) {
+      ratio = (ratio * 0xffe5caca7e10e4e61c3624eaa0941cd0n) >> 128n;
+    }
+    if ((absTick & 0x10n) !== 0n) {
+      ratio = (ratio * 0xffcb9843d60f6159c9db58835c926644n) >> 128n;
+    }
+    if ((absTick & 0x20n) !== 0n) {
+      ratio = (ratio * 0xff973b41fa98c081472e6896dfb254c0n) >> 128n;
+    }
+    if ((absTick & 0x40n) !== 0n) {
+      ratio = (ratio * 0xff2ea16466c96a3843ec78b326b52861n) >> 128n;
+    }
+    if ((absTick & 0x80n) !== 0n) {
+      ratio = (ratio * 0xfe5dee046a99a2a811c461f1969c3053n) >> 128n;
+    }
+    if ((absTick & 0x100n) !== 0n) {
+      ratio = (ratio * 0xfcbe86c7900a88aedcffc83b479aa3a4n) >> 128n;
+    }
+    if ((absTick & 0x200n) !== 0n) {
+      ratio = (ratio * 0xf987a7253ac413176f2b074cf7815e54n) >> 128n;
+    }
+    if ((absTick & 0x400n) !== 0n) {
+      ratio = (ratio * 0xf3392b0822b70005940c7a398e4b70f3n) >> 128n;
+    }
+    if ((absTick & 0x800n) !== 0n) {
+      ratio = (ratio * 0xe7159475a2c29b7443b29c7fa6e889d9n) >> 128n;
+    }
+    if ((absTick & 0x1000n) !== 0n) {
+      ratio = (ratio * 0xd097f3bdfd2022b8845ad8f792aa5825n) >> 128n;
+    }
+    if ((absTick & 0x2000n) !== 0n) {
+      ratio = (ratio * 0xa9f746462d870fdf8a65dc1f90e061e5n) >> 128n;
+    }
+    if ((absTick & 0x4000n) !== 0n) {
+      ratio = (ratio * 0x70d869a156d2a1b890bb3df62baf32f7n) >> 128n;
+    }
+    if ((absTick & 0x8000n) !== 0n) {
+      ratio = (ratio * 0x31be135f97d08fd981231505542fcfa6n) >> 128n;
+    }
+    if ((absTick & 0x10000n) !== 0n) {
+      ratio = (ratio * 0x9aa508b5b7a84e1c677de54f3e99bc9n) >> 128n;
+    }
+    if ((absTick & 0x20000n) !== 0n) {
+      ratio = (ratio * 0x5d6af8dedb81196699c329225ee604n) >> 128n;
+    }
+    if ((absTick & 0x40000n) !== 0n) {
+      ratio = (ratio * 0x2216e584f5fa1ea926041bedfe98n) >> 128n;
+    }
+    if ((absTick & 0x80000n) !== 0n) {
+      ratio = (ratio * 0x48a170391f7dc42444e8fa2n) >> 128n;
     }
 
-    return ratio;
+    // For positive ticks, we computed 1/ratio, so take reciprocal
+    if (tick > 0n) {
+      ratio = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn / ratio;
+    }
+
+    // Convert from Q128 to Q96 (shift right by 32, round up)
+    const shifted = ratio >> 32n;
+    const remainder = ratio & 0xffffffffn;
+    if (remainder > 0n) {
+      return shifted + 1n;
+    }
+    return shifted;
   }
 
   /**
-   * Get tick at sqrt ratio (simplified)
+   * Get tick at sqrt ratio - Exact port from Uniswap V3 TickMath.sol
+   * https://github.com/Uniswap/v3-core/blob/main/contracts/libraries/TickMath.sol
    */
   private _getTickAtSqrtRatio(sqrtPriceX96: u160): i24 {
-    if (sqrtPriceX96 === this.Q96) {
-      return 0n;
+    // require(sqrtPriceX96 >= MIN_SQRT_RATIO && sqrtPriceX96 < MAX_SQRT_RATIO, 'R');
+    if (sqrtPriceX96 < this.MIN_SQRT_RATIO) {
+      revert("R");
+    }
+    if (sqrtPriceX96 >= this.MAX_SQRT_RATIO) {
+      revert("R");
     }
 
-    let tick: i24 = 0n;
+    let ratio: u256 = sqrtPriceX96;
+    ratio = ratio << 32n;
 
-    if (sqrtPriceX96 > this.Q96) {
-      while (tick < 5000n) {
-        const ratio = this._getSqrtRatioAtTick(tick + 1n);
-        if (ratio > sqrtPriceX96) {
-          return tick;
-        }
-        tick = tick + 1n;
-      }
+    let r: u256 = ratio;
+    let msb: u256 = 0n;
+    let f: u256 = 0n;
+
+    // assembly { let f := shl(7, gt(r, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)) msb := or(msb, f) r := shr(f, r) }
+    asm`
+      ${f} := shl(7, gt(${r}, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))
+      ${msb} := or(${msb}, ${f})
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${f} := shl(6, gt(${r}, 0xFFFFFFFFFFFFFFFF))
+      ${msb} := or(${msb}, ${f})
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${f} := shl(5, gt(${r}, 0xFFFFFFFF))
+      ${msb} := or(${msb}, ${f})
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${f} := shl(4, gt(${r}, 0xFFFF))
+      ${msb} := or(${msb}, ${f})
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${f} := shl(3, gt(${r}, 0xFF))
+      ${msb} := or(${msb}, ${f})
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${f} := shl(2, gt(${r}, 0xF))
+      ${msb} := or(${msb}, ${f})
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${f} := shl(1, gt(${r}, 0x3))
+      ${msb} := or(${msb}, ${f})
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${f} := gt(${r}, 0x1)
+      ${msb} := or(${msb}, ${f})
+    `;
+
+    // if (msb >= 128) r = ratio >> (msb - 127); else r = ratio << (127 - msb);
+    if (msb >= 128n) {
+      r = ratio >> (msb - 127n);
     } else {
-      while (tick > -5000n) {
-        const ratio = this._getSqrtRatioAtTick(tick);
-        if (ratio <= sqrtPriceX96) {
-          return tick;
-        }
-        tick = tick - 1n;
-      }
+      r = ratio << (127n - msb);
     }
 
-    return tick;
+    // int256 log_2 = (int256(msb) - 128) << 64;
+    let log_2: i256 = (msb - 128n) << 64n;
+
+    // assembly { r := shr(127, mul(r, r)) let f := shr(128, r) log_2 := or(log_2, shl(63, f)) r := shr(f, r) }
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(63, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(62, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(61, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(60, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(59, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(58, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(57, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(56, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(55, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(54, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(53, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(52, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(51, ${f}))
+      ${r} := shr(${f}, ${r})
+    `;
+    asm`
+      ${r} := shr(127, mul(${r}, ${r}))
+      ${f} := shr(128, ${r})
+      ${log_2} := or(${log_2}, shl(50, ${f}))
+    `;
+
+    // int256 log_sqrt10001 = log_2 * 255738958999603826347141;
+    let log_sqrt10001: i256 = log_2 * 255738958999603826347141n;
+
+    // int24 tickLow = int24((log_sqrt10001 - 3402992956809132418596140100660247210) >> 128);
+    // int24 tickHi = int24((log_sqrt10001 + 291339464771989622907027621153398088495) >> 128);
+    // Note: Solidity uses sar (arithmetic right shift) for int256, we use asm for this
+    let tickLow: i24 = 0n;
+    let tickHi: i24 = 0n;
+    asm`
+      ${tickLow} := sar(128, sub(${log_sqrt10001}, 3402992956809132418596140100660247210))
+      ${tickHi} := sar(128, add(${log_sqrt10001}, 291339464771989622907027621153398088495))
+    `;
+
+    // tick = tickLow == tickHi ? tickLow : getSqrtRatioAtTick(tickHi) <= sqrtPriceX96 ? tickHi : tickLow;
+    if (tickLow === tickHi) {
+      return tickLow;
+    }
+    if (this._getSqrtRatioAtTick(tickHi) <= sqrtPriceX96) {
+      return tickHi;
+    }
+    return tickLow;
   }
 
   /**

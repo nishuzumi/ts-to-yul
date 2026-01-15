@@ -353,9 +353,14 @@ contract UniswapV3PoolTest is Test {
 
     // ============ Fuzz Tests ============
 
+    // Min and max sqrt ratios from Uniswap V3 TickMath.sol
+    uint160 constant MIN_SQRT_RATIO = 4295128739;
+    uint160 constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342;
+
     function testFuzz_Initialize(uint160 sqrtPriceX96) public {
-        vm.assume(sqrtPriceX96 > 0);
-        vm.assume(sqrtPriceX96 <= type(uint160).max / 2); // Avoid overflow
+        // Bound to valid range (like Uniswap V3)
+        vm.assume(sqrtPriceX96 >= MIN_SQRT_RATIO);
+        vm.assume(sqrtPriceX96 < MAX_SQRT_RATIO);
 
         pool.initialize(sqrtPriceX96);
 

@@ -1,0 +1,101 @@
+name: Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  unit-test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+      - name: Run integration tests
+        run: pnpm test:integration
+
+  forge-test:
+    name: Forge Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build ts-to-yul
+        run: pnpm build
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install solc
+        run: |
+          sudo add-apt-repository ppa:ethereum/ethereum
+          sudo apt-get update
+          sudo apt-get install -y solc
+
+      # UniswapV2
+      - name: Compile UniswapV2 contracts
+        run: |
+          node dist/cli.js build examples/uniswapv2/src/UniswapV2Pair.ts -o examples/uniswapv2/bytecode.hex
+          node dist/cli.js build examples/uniswapv2/src/UniswapV2Router.ts -o examples/uniswapv2/bytecode-router.hex
+
+      - name: Run UniswapV2 tests
+        working-directory: examples/uniswapv2
+        run: |
+          forge install foundry-rs/forge-std --no-git
+          forge test -vvv
+
+      # UniswapV3
+      - name: Compile UniswapV3 contracts
+        run: |
+          node dist/cli.js build examples/uniswapv3/src/UniswapV3Pool.ts -o examples/uniswapv3/bytecode.hex
+
+      - name: Run UniswapV3 tests
+        working-directory: examples/uniswapv3
+        run: |
+          forge install foundry-rs/forge-std --no-git
+          forge test -vvv
+
+      # Compound
+      - name: Compile Compound contracts
+        run: |
+          node dist/cli.js build examples/compound/src/CToken.ts -o examples/compound/bytecode.hex
+
+      - name: Run Compound tests
+        working-directory: examples/compound
+        run: |
+          forge install foundry-rs/forge-std --no-git
+          forge test -vvv
