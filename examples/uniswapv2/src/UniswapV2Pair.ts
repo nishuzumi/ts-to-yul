@@ -1,11 +1,4 @@
-import {
-  u256,
-  address,
-  storage,
-  msg,
-  revert,
-  view,
-} from "../../../runtime/index.js";
+import { u256, address, storage, msg, revert, view } from "../../../runtime/index.js";
 import { UniswapV2ERC20 } from "./UniswapV2ERC20.js";
 import { sqrt, min } from "./libraries/Math.js";
 

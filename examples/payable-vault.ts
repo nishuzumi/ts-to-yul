@@ -1,12 +1,4 @@
-import {
-  u256,
-  address,
-  storage,
-  Mapping,
-  msg,
-  revert,
-  payable,
-} from "../runtime/index.js";
+import { u256, address, storage, Mapping, msg, revert, payable } from "../runtime/index.js";
 
 /**
  * Simple ETH vault with deposit tracking

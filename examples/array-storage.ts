@@ -1,10 +1,4 @@
-import {
-  u256,
-  address,
-  storage,
-  msg,
-  revert,
-} from "../runtime/index.js";
+import { u256, address, storage, msg, revert } from "../runtime/index.js";
 
 /**
  * Contract demonstrating array storage

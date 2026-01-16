@@ -288,7 +288,8 @@ export class CToken {
 
     // Seize amount = repay * 1.08 liquidation incentive / exchangeRate
     const exchangeRate = this.exchangeRateStored();
-    const seizeTokens = (actualRepayAmount * 1080000000000000000n) / exchangeRate / this.MANTISSA * this.MANTISSA;
+    const seizeTokens =
+      ((actualRepayAmount * 1080000000000000000n) / exchangeRate / this.MANTISSA) * this.MANTISSA;
 
     const borrowerTokens = this.accountTokens[borrower];
     const actualSeizeTokens = seizeTokens > borrowerTokens ? borrowerTokens : seizeTokens;

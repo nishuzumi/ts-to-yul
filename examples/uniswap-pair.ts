@@ -1,13 +1,4 @@
-import {
-  u256,
-  address,
-  bool,
-  storage,
-  Mapping,
-  msg,
-  revert,
-  view,
-} from "../runtime/index.js";
+import { u256, address, bool, storage, Mapping, msg, revert, view } from "../runtime/index.js";
 
 /**
  * Simplified Uniswap V2 Pair (AMM)
@@ -174,7 +165,7 @@ export class UniswapV2Pair {
     // amountOut = (amountIn * 997 * reserveOut) / (reserveIn * 1000 + amountIn * 997)
     const amountInWithFee = amount0In * 997n;
     const numerator = amountInWithFee * this.reserve1;
-    const denominator = (this.reserve0 * 1000n) + amountInWithFee;
+    const denominator = this.reserve0 * 1000n + amountInWithFee;
     const amount1Out = numerator / denominator;
 
     if (amount1Out === 0n) {
@@ -206,7 +197,7 @@ export class UniswapV2Pair {
 
     const amountInWithFee = amountIn * 997n;
     const numerator = amountInWithFee * this.reserve1;
-    const denominator = (this.reserve0 * 1000n) + amountInWithFee;
+    const denominator = this.reserve0 * 1000n + amountInWithFee;
 
     return numerator / denominator;
   }

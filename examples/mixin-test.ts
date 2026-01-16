@@ -1,13 +1,4 @@
-import {
-  storage,
-  u256,
-  address,
-  Mapping,
-  Mixin,
-  msg,
-  payable,
-  view,
-} from "../runtime";
+import { storage, u256, address, Mapping, Mixin, msg, payable, view } from "../runtime";
 
 // 父类 1: ERC20 基础
 class ERC20Base {
@@ -62,9 +53,9 @@ export class MyToken extends Mixin(ERC20Base, Ownable, Pausable) {
 
   // 使用所有父类的方法
   public mint(to: address, amount: u256): void {
-    this.onlyOwner();        // from Ownable
+    this.onlyOwner(); // from Ownable
     this.requireNotPaused(); // from Pausable
-    this._mint(to, amount);  // from ERC20Base
+    this._mint(to, amount); // from ERC20Base
   }
 
   // 覆盖 pause，添加权限检查

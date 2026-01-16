@@ -210,9 +210,7 @@ export class Analyzer {
     return functions;
   }
 
-  private analyzeParams(
-    params: import("ts-morph").ParameterDeclaration[]
-  ): Parameter[] {
+  private analyzeParams(params: import("ts-morph").ParameterDeclaration[]): Parameter[] {
     const context = this.createTypeContext();
     return params
       .filter((p) => p.getName() !== "this") // Skip 'this' parameter
@@ -233,9 +231,7 @@ export class Analyzer {
     return mapType(typeName, context);
   }
 
-  private analyzeMutability(
-    method: MethodDeclaration
-  ): "pure" | "view" | "nonpayable" | "payable" {
+  private analyzeMutability(method: MethodDeclaration): "pure" | "view" | "nonpayable" | "payable" {
     const mutabilities = ["payable", "view", "pure"] as const;
     const decoratorNames = method.getDecorators().map((d) => d.getName());
     return mutabilities.find((m) => decoratorNames.includes(m)) ?? "nonpayable";

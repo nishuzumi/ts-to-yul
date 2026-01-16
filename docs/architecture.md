@@ -41,6 +41,7 @@ export class Parser {
 ```
 
 **关键功能**:
+
 - 解析导出的类作为合约
 - 提取类属性和方法
 - 解析装饰器 (`@storage`, `@view`, `@payable`)
@@ -69,7 +70,7 @@ interface StorageVariable {
 
 interface FunctionInfo {
   name: string;
-  selector: string;  // 4 bytes hex
+  selector: string; // 4 bytes hex
   params: Parameter[];
   returnType: string | null;
   visibility: "public" | "private";
@@ -78,6 +79,7 @@ interface FunctionInfo {
 ```
 
 **关键功能**:
+
 - 自动分配存储槽 (slot)
 - 计算函数选择器 (keccak256)
 - 解析函数签名
@@ -92,19 +94,19 @@ interface FunctionInfo {
 
 **关键转换**:
 
-| TypeScript | Yul |
-|------------|-----|
-| `this.field` | `sload(slot)` |
-| `this.field = x` | `sstore(slot, x)` |
+| TypeScript          | Yul                           |
+| ------------------- | ----------------------------- |
+| `this.field`        | `sload(slot)`                 |
+| `this.field = x`    | `sstore(slot, x)`             |
 | `this.mapping[key]` | `sload(keccak256(key, slot))` |
-| `msg.sender` | `caller()` |
-| `msg.value` | `callvalue()` |
-| `block.number` | `number()` |
-| `a + b` | `add(a, b)` |
-| `a - b` (signed) | `sub(a, b)` with `slt`/`sgt` |
-| `if (cond)` | `if cond { ... }` |
-| `for (...)` | `for { } cond { } { }` |
-| `revert("msg")` | `revert(offset, size)` |
+| `msg.sender`        | `caller()`                    |
+| `msg.value`         | `callvalue()`                 |
+| `block.number`      | `number()`                    |
+| `a + b`             | `add(a, b)`                   |
+| `a - b` (signed)    | `sub(a, b)` with `slt`/`sgt`  |
+| `if (cond)`         | `if cond { ... }`             |
+| `for (...)`         | `for { } cond { } { }`        |
+| `revert("msg")`     | `revert(offset, size)`        |
 
 **函数调度器生成**:
 
@@ -158,7 +160,13 @@ type YulStatement =
   | { kind: "assignment"; names: string[]; value: YulExpression }
   | { kind: "if"; condition: YulExpression; body: YulStatement[] }
   | { kind: "switch"; expr: YulExpression; cases: YulCase[]; default?: YulStatement[] }
-  | { kind: "for"; pre: YulStatement[]; cond: YulExpression; post: YulStatement[]; body: YulStatement[] }
+  | {
+      kind: "for";
+      pre: YulStatement[];
+      cond: YulExpression;
+      post: YulStatement[];
+      body: YulStatement[];
+    }
   | { kind: "function"; name: string; params: string[]; returns: string[]; body: YulStatement[] }
   | { kind: "leave" }
   | { kind: "break" }
@@ -221,12 +229,12 @@ transfer(address,uint256) → keccak256("transfer(address,uint256)")[0:4]
 有符号整数 (`i256`, `i128`, etc.) 使用 EVM 的有符号操作码:
 
 | 操作 | 无符号 | 有符号 |
-|------|--------|--------|
-| 除法 | `div` | `sdiv` |
-| 取模 | `mod` | `smod` |
-| 小于 | `lt` | `slt` |
-| 大于 | `gt` | `sgt` |
-| 右移 | `shr` | `sar` |
+| ---- | ------ | ------ |
+| 除法 | `div`  | `sdiv` |
+| 取模 | `mod`  | `smod` |
+| 小于 | `lt`   | `slt`  |
+| 大于 | `gt`   | `sgt`  |
+| 右移 | `shr`  | `sar`  |
 
 ## 目录结构
 

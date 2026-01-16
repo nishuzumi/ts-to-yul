@@ -88,11 +88,7 @@ export const Yul = {
     return { type: "if", condition, body };
   },
 
-  switch_(
-    expr: YulExpression,
-    cases: YulCase[],
-    default_?: YulStatement[]
-  ): YulStatement {
+  switch_(expr: YulExpression, cases: YulCase[], default_?: YulStatement[]): YulStatement {
     if (default_ === undefined) {
       return { type: "switch", expr, cases };
     }
@@ -108,12 +104,7 @@ export const Yul = {
     return { type: "for", pre, cond, post, body };
   },
 
-  fn(
-    name: string,
-    params: string[],
-    returns: string[],
-    body: YulStatement[]
-  ): YulStatement {
+  fn(name: string, params: string[], returns: string[], body: YulStatement[]): YulStatement {
     return { type: "function", name, params, returns, body };
   },
 

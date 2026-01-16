@@ -31,6 +31,7 @@ npm install ts-to-yul
 ```
 
 **环境要求：**
+
 - Node.js >= 20
 - solc（用于字节码编译）
 
@@ -75,17 +76,17 @@ ts-to-yul build counter.ts -O -o counter.hex
 
 ## 类型系统
 
-| TypeScript | EVM | 说明 |
-|------------|-----|------|
-| `u256`, `u128`, `u64`, `u32`, `u8` | 无符号整数 | 不同位宽 |
-| `i256`, `i128`, `i64`, `i32`, `i8` | 有符号整数 | 支持负数 |
-| `address`, `addressPayable` | 地址 | 20 字节 |
-| `bytes32`, `bytes20`, `bytes4` | 固定字节 | 固定长度 |
-| `bool` | 布尔值 | true/false |
-| `Mapping<K, V>` | 映射 | 键值存储 |
-| `StorageArray<T>` | 动态数组 | push/pop/length |
-| `CalldataArray<T>` | Calldata 数组 | length/index/slice |
-| `interface` | 结构体 | 复合类型 |
+| TypeScript                         | EVM           | 说明               |
+| ---------------------------------- | ------------- | ------------------ |
+| `u256`, `u128`, `u64`, `u32`, `u8` | 无符号整数    | 不同位宽           |
+| `i256`, `i128`, `i64`, `i32`, `i8` | 有符号整数    | 支持负数           |
+| `address`, `addressPayable`        | 地址          | 20 字节            |
+| `bytes32`, `bytes20`, `bytes4`     | 固定字节      | 固定长度           |
+| `bool`                             | 布尔值        | true/false         |
+| `Mapping<K, V>`                    | 映射          | 键值存储           |
+| `StorageArray<T>`                  | 动态数组      | push/pop/length    |
+| `CalldataArray<T>`                 | Calldata 数组 | length/index/slice |
+| `interface`                        | 结构体        | 复合类型           |
 
 ## 装饰器
 
@@ -283,27 +284,27 @@ export class ReentrancyGuard {
 
 ### 特性展示
 
-| 示例 | 说明 | 测试 |
-|------|------|------|
+| 示例                 | 说明                     | 测试         |
+| -------------------- | ------------------------ | ------------ |
 | `examples/showcase/` | 132 个 Solidity 特性演示 | Foundry 测试 |
 
 ### 基础示例
 
-| 示例 | 说明 |
-|------|------|
-| `examples/counter.ts` | 简单计数器 |
-| `examples/token.ts` | 基础 ERC20 代币 |
-| `examples/erc20-mapping.ts` | 带映射的 ERC20 |
-| `examples/storage.ts` | 存储变量演示 |
-| `examples/payable-vault.ts` | 可支付金库 |
+| 示例                        | 说明            |
+| --------------------------- | --------------- |
+| `examples/counter.ts`       | 简单计数器      |
+| `examples/token.ts`         | 基础 ERC20 代币 |
+| `examples/erc20-mapping.ts` | 带映射的 ERC20  |
+| `examples/storage.ts`       | 存储变量演示    |
+| `examples/payable-vault.ts` | 可支付金库      |
 
 ### DeFi 协议
 
-| 示例 | 说明 | 测试 |
-|------|------|------|
+| 示例                  | 说明                           | 测试         |
+| --------------------- | ------------------------------ | ------------ |
 | `examples/uniswapv2/` | Uniswap V2 AMM (Pair + Router) | Foundry 测试 |
-| `examples/uniswapv3/` | Uniswap V3 集中流动性 | Foundry 测试 |
-| `examples/compound/` | Compound cToken 借贷 | - |
+| `examples/uniswapv3/` | Uniswap V3 集中流动性          | Foundry 测试 |
+| `examples/compound/`  | Compound cToken 借贷           | -            |
 
 ### 运行示例测试
 
@@ -336,15 +337,15 @@ cd examples/uniswapv3 && forge test
 └─────────────────────────────────────────────────────────────┘
 ```
 
-| 模块 | 文件 | 职责 |
-|------|------|------|
-| Parser | `src/parser/` | 通过 ts-morph 解析 TypeScript |
-| Analyzer | `src/analyzer/` | 语义分析、存储槽分配 |
-| Transformer | `src/transformer/` | TS AST → Yul AST 转换 |
-| Printer | `src/yul/printer.ts` | Yul AST → 格式化文本 |
-| EVM Types | `src/evm/types.ts` | EVM 类型系统 |
-| EVM Builtins | `src/evm/builtins.ts` | 73 个 EVM 操作码定义 |
-| ABI | `src/evm/abi.ts` | 函数选择器计算、ABI 编码 |
+| 模块         | 文件                  | 职责                          |
+| ------------ | --------------------- | ----------------------------- |
+| Parser       | `src/parser/`         | 通过 ts-morph 解析 TypeScript |
+| Analyzer     | `src/analyzer/`       | 语义分析、存储槽分配          |
+| Transformer  | `src/transformer/`    | TS AST → Yul AST 转换         |
+| Printer      | `src/yul/printer.ts`  | Yul AST → 格式化文本          |
+| EVM Types    | `src/evm/types.ts`    | EVM 类型系统                  |
+| EVM Builtins | `src/evm/builtins.ts` | 73 个 EVM 操作码定义          |
+| ABI          | `src/evm/abi.ts`      | 函数选择器计算、ABI 编码      |
 
 详见 [docs/architecture.md](docs/architecture.md)。
 
@@ -366,23 +367,23 @@ pnpm format           # Prettier 格式化
 
 ### 测试覆盖
 
-| 分类 | 测试数 |
-|------|--------|
-| 类型系统 | 19 |
-| 控制流 | 17 |
-| 引用类型 | 14 |
-| 内联汇编 | 13 |
-| Unchecked 算术 | 12 |
-| 外部调用 | 11 |
-| 事件 | 11 |
-| 修饰符 | 11 |
-| Calldata 数组 | 11 |
-| ABI 编码 | 11 |
-| 合约创建 | 10 |
-| Bytes 拼接 | 10 |
-| 继承 | 8 |
-| 其他... | ... |
-| **总计** | **288** |
+| 分类           | 测试数  |
+| -------------- | ------- |
+| 类型系统       | 19      |
+| 控制流         | 17      |
+| 引用类型       | 14      |
+| 内联汇编       | 13      |
+| Unchecked 算术 | 12      |
+| 外部调用       | 11      |
+| 事件           | 11      |
+| 修饰符         | 11      |
+| Calldata 数组  | 11      |
+| ABI 编码       | 11      |
+| 合约创建       | 10      |
+| Bytes 拼接     | 10      |
+| 继承           | 8       |
+| 其他...        | ...     |
+| **总计**       | **288** |
 
 ## 文档
 
@@ -395,22 +396,22 @@ pnpm format           # Prettier 格式化
 
 ts-to-yul 实现了 **132 个 Solidity 语言特性**，覆盖率 **100%**：
 
-| 分类 | 特性数 |
-|------|--------|
-| 值类型 | 10 |
-| 引用类型 | 7 |
-| 全局变量 | 18 |
-| 合约结构 | 14 |
-| 继承 | 9 |
-| 事件/错误 | 10 |
-| 控制结构 | 9 |
-| 运算符 | 18 |
-| 地址操作 | 8 |
-| ABI 编码 | 6 |
-| 类型信息 | 6 |
-| 合约创建 | 3 |
-| 单位 | 8 |
-| 其他特性 | 5 |
+| 分类      | 特性数 |
+| --------- | ------ |
+| 值类型    | 10     |
+| 引用类型  | 7      |
+| 全局变量  | 18     |
+| 合约结构  | 14     |
+| 继承      | 9      |
+| 事件/错误 | 10     |
+| 控制结构  | 9      |
+| 运算符    | 18     |
+| 地址操作  | 8      |
+| ABI 编码  | 6      |
+| 类型信息  | 6      |
+| 合约创建  | 3      |
+| 单位      | 8      |
+| 其他特性  | 5      |
 
 详见 [docs/solidity-comparison.md](docs/solidity-comparison.md) 完整特性矩阵。
 

@@ -4,36 +4,83 @@
  */
 import {
   // Integer Types (FEATURE: uint8~uint256, int8~int256)
-  u8, u16, u32, u64, u128, u256,
-  i8, i32, i64, i128, i256,
+  u8,
+  u16,
+  u32,
+  u64,
+  u128,
+  u256,
+  i8,
+  i32,
+  i64,
+  i128,
+  i256,
   // Address Types (FEATURE: address, address payable)
-  address, addressPayable,
+  address,
+  addressPayable,
   // Bytes Types (FEATURE: bytes1~bytes32)
-  bytes1, bytes4, bytes20, bytes32,
+  bytes1,
+  bytes4,
+  bytes20,
+  bytes32,
   // Boolean (FEATURE: bool)
   bool,
   // Storage Decorators
-  storage, transient, immutable, constant, slot,
+  storage,
+  transient,
+  immutable,
+  constant,
+  slot,
   // Function Decorators
-  payable, view, pure, virtual, override, internal, external,
+  payable,
+  view,
+  pure,
+  virtual,
+  override,
+  internal,
+  external,
   // Event Decorators
-  event, anonymous, indexed, Event,
+  event,
+  anonymous,
+  indexed,
+  Event,
   // Reference Types
-  Mapping, StorageArray, StorageBytes, StorageString, CalldataArray,
+  Mapping,
+  StorageArray,
+  StorageBytes,
+  StorageString,
+  CalldataArray,
   // Context Objects (FEATURE: msg, tx, block properties)
-  msg, tx, block,
+  msg,
+  tx,
+  block,
   // Global Functions
-  require, assert, revert,
-  keccak256, sha256, ripemd160, ecrecover,
-  blockhash, blobhash, gasleft,
-  addmod, mulmod,
+  require,
+  assert,
+  revert,
+  keccak256,
+  sha256,
+  ripemd160,
+  ecrecover,
+  blockhash,
+  blobhash,
+  gasleft,
+  addmod,
+  mulmod,
   selfdestruct,
   // ABI encoding
   abi,
   // Assembly
   asm,
   // Units
-  wei, gwei, ether, seconds, minutes, hours, days, weeks,
+  wei,
+  gwei,
+  ether,
+  seconds,
+  minutes,
+  hours,
+  days,
+  weeks,
   // Call utilities
   call,
   // Constants
@@ -230,15 +277,15 @@ export class ShowcaseSimple {
   @view
   public getBlockInfo(): [u256, u256, u256, address, u256, u256, u256, u256, u256] {
     return [
-      block.number,       // FEATURE: block.number
-      block.timestamp,    // FEATURE: block.timestamp
-      block.chainid,      // FEATURE: block.chainid
-      block.coinbase,     // FEATURE: block.coinbase
-      block.basefee,      // FEATURE: block.basefee
-      block.gaslimit,     // FEATURE: block.gaslimit
-      block.difficulty,   // FEATURE: block.difficulty
-      block.prevrandao,   // FEATURE: block.prevrandao
-      block.blobbasefee,  // FEATURE: block.blobbasefee
+      block.number, // FEATURE: block.number
+      block.timestamp, // FEATURE: block.timestamp
+      block.chainid, // FEATURE: block.chainid
+      block.coinbase, // FEATURE: block.coinbase
+      block.basefee, // FEATURE: block.basefee
+      block.gaslimit, // FEATURE: block.gaslimit
+      block.difficulty, // FEATURE: block.difficulty
+      block.prevrandao, // FEATURE: block.prevrandao
+      block.blobbasefee, // FEATURE: block.blobbasefee
     ];
   }
 
@@ -248,11 +295,11 @@ export class ShowcaseSimple {
   @view
   public getMsgInfo(): [address, u256, bytes4, address, u256] {
     return [
-      msg.sender,     // FEATURE: msg.sender
-      msg.value,      // FEATURE: msg.value
-      msg.sig,        // FEATURE: msg.sig
-      tx.origin,      // FEATURE: tx.origin
-      tx.gasprice,    // FEATURE: tx.gasprice
+      msg.sender, // FEATURE: msg.sender
+      msg.value, // FEATURE: msg.value
+      msg.sig, // FEATURE: msg.sig
+      tx.origin, // FEATURE: tx.origin
+      tx.gasprice, // FEATURE: tx.gasprice
     ];
     // msg.data also available
   }
@@ -272,12 +319,12 @@ export class ShowcaseSimple {
     s: bytes32
   ): [bytes32, bytes32, u256, u256, u256, address] {
     return [
-      blockhash(blockNum),       // FEATURE: blockhash()
-      blobhash(blobIdx),         // FEATURE: blobhash()
-      gasleft(),                 // FEATURE: gasleft()
-      addmod(a, b, n),           // FEATURE: addmod()
-      mulmod(a, b, n),           // FEATURE: mulmod()
-      ecrecover(hash, v, r, s),  // FEATURE: ecrecover()
+      blockhash(blockNum), // FEATURE: blockhash()
+      blobhash(blobIdx), // FEATURE: blobhash()
+      gasleft(), // FEATURE: gasleft()
+      addmod(a, b, n), // FEATURE: addmod()
+      mulmod(a, b, n), // FEATURE: mulmod()
+      ecrecover(hash, v, r, s), // FEATURE: ecrecover()
     ];
     // keccak256(), sha256(), ripemd160() demonstrated via assembly
   }
@@ -456,12 +503,12 @@ export class ShowcaseSimple {
   @pure
   public arithmeticOps(a: u256, b: u256): [u256, u256, u256, u256, u256, u256] {
     return [
-      a + b,   // FEATURE: +
-      a - b,   // FEATURE: -
-      a * b,   // FEATURE: *
-      a / b,   // FEATURE: /
-      a % b,   // FEATURE: %
-      a ** b,  // FEATURE: **
+      a + b, // FEATURE: +
+      a - b, // FEATURE: -
+      a * b, // FEATURE: *
+      a / b, // FEATURE: /
+      a % b, // FEATURE: %
+      a ** b, // FEATURE: **
     ];
   }
 
@@ -469,12 +516,12 @@ export class ShowcaseSimple {
   @pure
   public compoundOps(a: u256, b: u256): u256 {
     let result = a;
-    result = result + 1n;  // FEATURE: ++ (as assignment)
-    result = result - 1n;  // FEATURE: -- (as assignment)
-    result += b;           // FEATURE: +=
-    result -= 1n;          // FEATURE: -=
-    result *= 2n;          // FEATURE: *=
-    result /= 2n;          // FEATURE: /=
+    result = result + 1n; // FEATURE: ++ (as assignment)
+    result = result - 1n; // FEATURE: -- (as assignment)
+    result += b; // FEATURE: +=
+    result -= 1n; // FEATURE: -=
+    result *= 2n; // FEATURE: *=
+    result /= 2n; // FEATURE: /=
     return result;
   }
 
@@ -482,12 +529,12 @@ export class ShowcaseSimple {
   @pure
   public comparisonOps(a: u256, b: u256): [bool, bool, bool, bool, bool, bool] {
     return [
-      a === b,   // FEATURE: ==
-      a !== b,   // FEATURE: !=
-      a < b,     // FEATURE: <
-      a > b,     // FEATURE: >
-      a <= b,    // FEATURE: <=
-      a >= b,    // FEATURE: >=
+      a === b, // FEATURE: ==
+      a !== b, // FEATURE: !=
+      a < b, // FEATURE: <
+      a > b, // FEATURE: >
+      a <= b, // FEATURE: <=
+      a >= b, // FEATURE: >=
     ];
   }
 
@@ -495,12 +542,12 @@ export class ShowcaseSimple {
   @pure
   public bitwiseOps(a: u256, b: u256): [u256, u256, u256, u256, u256, u256] {
     return [
-      a & b,     // FEATURE: &
-      a | b,     // FEATURE: |
-      a ^ b,     // FEATURE: ^
-      ~a,        // FEATURE: ~
-      a << 2n,   // FEATURE: <<
-      b >> 1n,   // FEATURE: >>
+      a & b, // FEATURE: &
+      a | b, // FEATURE: |
+      a ^ b, // FEATURE: ^
+      ~a, // FEATURE: ~
+      a << 2n, // FEATURE: <<
+      b >> 1n, // FEATURE: >>
     ];
   }
 
@@ -508,9 +555,9 @@ export class ShowcaseSimple {
   @pure
   public logicalOps(a: bool, b: bool): [bool, bool, bool] {
     return [
-      a && b,    // FEATURE: &&
-      a || b,    // FEATURE: ||
-      !a,        // FEATURE: !
+      a && b, // FEATURE: &&
+      a || b, // FEATURE: ||
+      !a, // FEATURE: !
     ];
   }
 
@@ -531,9 +578,9 @@ export class ShowcaseSimple {
   @view
   public getAddressInfo(addr: address): [u256, u256, bytes32] {
     return [
-      addr.balance,      // FEATURE: .balance
-      addr.code,         // FEATURE: .code (returns size)
-      addr.codehash,     // FEATURE: .codehash
+      addr.balance, // FEATURE: .balance
+      addr.code, // FEATURE: .code (returns size)
+      addr.codehash, // FEATURE: .codehash
     ];
   }
 
@@ -587,14 +634,14 @@ export class ShowcaseSimple {
   @pure
   public getUnits(): [u256, u256, u256, u256, u256, u256, u256, u256] {
     return [
-      wei,       // FEATURE: wei (1)
-      gwei,      // FEATURE: gwei (1e9)
-      ether,     // FEATURE: ether (1e18)
-      seconds,   // FEATURE: seconds (1)
-      minutes,   // FEATURE: minutes (60)
-      hours,     // FEATURE: hours (3600)
-      days,      // FEATURE: days (86400)
-      weeks,     // FEATURE: weeks (604800)
+      wei, // FEATURE: wei (1)
+      gwei, // FEATURE: gwei (1e9)
+      ether, // FEATURE: ether (1e18)
+      seconds, // FEATURE: seconds (1)
+      minutes, // FEATURE: minutes (60)
+      hours, // FEATURE: hours (3600)
+      days, // FEATURE: days (86400)
+      weeks, // FEATURE: weeks (604800)
     ];
   }
 
@@ -759,7 +806,7 @@ export class ShowcaseSimple {
     this.orders[idx(id)].buyer = buyer;
     this.orders[idx(id)].amount = amount;
     this.orders[idx(id)].price = price;
-    this.orders[idx(id)].status = 0n;  // Pending
+    this.orders[idx(id)].status = 0n; // Pending
     this.orders[idx(id)].timestamp = block.timestamp;
 
     this.OrderCreated.emit({

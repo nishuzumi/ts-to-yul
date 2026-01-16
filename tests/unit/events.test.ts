@@ -197,8 +197,9 @@ describe("Events", () => {
       expect(result.errors).toHaveLength(0);
       expect(result.abi).toBeDefined();
       if (result.abi) {
-        const eventAbi = result.abi.find((item: { type?: string; name?: string }) =>
-          item.type === "event" && item.name === "Transfer"
+        const eventAbi = result.abi.find(
+          (item: { type?: string; name?: string }) =>
+            item.type === "event" && item.name === "Transfer"
         );
         expect(eventAbi).toBeDefined();
       }
@@ -221,13 +222,13 @@ describe("Events", () => {
       expect(result.errors).toHaveLength(0);
       expect(result.abi).toBeDefined();
       if (result.abi) {
-        const eventAbi = result.abi.find((item: { type?: string; name?: string }) =>
-          item.type === "event" && item.name === "Log"
+        const eventAbi = result.abi.find(
+          (item: { type?: string; name?: string }) => item.type === "event" && item.name === "Log"
         );
         expect(eventAbi).toBeDefined();
         if (eventAbi && "inputs" in eventAbi) {
           const inputs = eventAbi.inputs as Array<{ name: string; indexed?: boolean }>;
-          const senderInput = inputs.find(i => i.name === "sender");
+          const senderInput = inputs.find((i) => i.name === "sender");
           expect(senderInput?.indexed).toBe(true);
         }
       }

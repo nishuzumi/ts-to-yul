@@ -23,10 +23,7 @@ export interface YulResult {
   errors: string[];
 }
 
-function transformToYul(
-  sourceFile: SourceFile,
-  contracts: ClassDeclaration[]
-): YulResult {
+function transformToYul(sourceFile: SourceFile, contracts: ClassDeclaration[]): YulResult {
   const analyzer = new Analyzer();
   const contractInfos = analyzer.analyze(sourceFile);
   const contractInfo = contractInfos[0]!;
@@ -94,10 +91,7 @@ export function compileToYulFromFile(filePath: string): YulResult {
   }
 }
 
-async function compileToBytecode(
-  yulResult: YulResult,
-  optimize: boolean
-): Promise<CompileResult> {
+async function compileToBytecode(yulResult: YulResult, optimize: boolean): Promise<CompileResult> {
   if (yulResult.errors.length > 0) {
     return { yul: yulResult.yul, bytecode: "", abi: yulResult.abi, errors: yulResult.errors };
   }
@@ -115,10 +109,7 @@ async function compileToBytecode(
   }
 }
 
-export function compile(
-  source: string,
-  options: CompileOptions = {}
-): Promise<CompileResult> {
+export function compile(source: string, options: CompileOptions = {}): Promise<CompileResult> {
   return compileToBytecode(compileToYul(source), options.optimize ?? false);
 }
 

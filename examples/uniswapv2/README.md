@@ -21,13 +21,15 @@ test/
 ## Features
 
 ### UniswapV2Pair
-- Constant product AMM (x * y = k)
+
+- Constant product AMM (x \* y = k)
 - 0.3% swap fee
 - LP token minting/burning
 - MINIMUM_LIQUIDITY lock (1000 wei)
 - ERC20 functions (transfer, approve, transferFrom)
 
 ### UniswapV2Router
+
 - `addLiquidity` / `removeLiquidity` with slippage protection
 - `swapExactToken0ForToken1` / `swapExactToken1ForToken0`
 - `swapToken0ForExactToken1` / `swapToken1ForExactToken0`
@@ -65,15 +67,16 @@ forge test --match-contract UniswapV2RouterTest
 ## Test Coverage
 
 Tests are adapted from official Uniswap V2 repositories:
+
 - [v2-core/test/UniswapV2Pair.spec.ts](https://github.com/Uniswap/v2-core/blob/master/test/UniswapV2Pair.spec.ts)
 - [v2-periphery/test/UniswapV2Router02.spec.ts](https://github.com/Uniswap/v2-periphery/blob/master/test/UniswapV2Router02.spec.ts)
 
 **42 tests total:**
 
-| Contract | Tests | Coverage |
-|----------|-------|----------|
-| UniswapV2Pair | 23 | mint, burn, swap, ERC20, fuzz tests |
-| UniswapV2Router | 19 | liquidity, swaps, slippage protection, fuzz tests |
+| Contract        | Tests | Coverage                                          |
+| --------------- | ----- | ------------------------------------------------- |
+| UniswapV2Pair   | 23    | mint, burn, swap, ERC20, fuzz tests               |
+| UniswapV2Router | 19    | liquidity, swaps, slippage protection, fuzz tests |
 
 ### Key Test Cases
 

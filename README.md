@@ -31,6 +31,7 @@ npm install ts-to-yul
 ```
 
 **Requirements:**
+
 - Node.js >= 20
 - solc (for bytecode compilation)
 
@@ -75,17 +76,17 @@ ts-to-yul build counter.ts -O -o counter.hex
 
 ## Type System
 
-| TypeScript | EVM | Description |
-|------------|-----|-------------|
-| `u256`, `u128`, `u64`, `u32`, `u8` | Unsigned integers | Different bit widths |
-| `i256`, `i128`, `i64`, `i32`, `i8` | Signed integers | Support negative numbers |
-| `address`, `addressPayable` | Address | 20 bytes |
-| `bytes32`, `bytes20`, `bytes4` | Fixed bytes | Fixed length |
-| `bool` | Boolean | true/false |
-| `Mapping<K, V>` | Mapping | Key-value storage |
-| `StorageArray<T>` | Dynamic array | push/pop/length |
-| `CalldataArray<T>` | Calldata array | length/index/slice |
-| `interface` | Struct | Composite types |
+| TypeScript                         | EVM               | Description              |
+| ---------------------------------- | ----------------- | ------------------------ |
+| `u256`, `u128`, `u64`, `u32`, `u8` | Unsigned integers | Different bit widths     |
+| `i256`, `i128`, `i64`, `i32`, `i8` | Signed integers   | Support negative numbers |
+| `address`, `addressPayable`        | Address           | 20 bytes                 |
+| `bytes32`, `bytes20`, `bytes4`     | Fixed bytes       | Fixed length             |
+| `bool`                             | Boolean           | true/false               |
+| `Mapping<K, V>`                    | Mapping           | Key-value storage        |
+| `StorageArray<T>`                  | Dynamic array     | push/pop/length          |
+| `CalldataArray<T>`                 | Calldata array    | length/index/slice       |
+| `interface`                        | Struct            | Composite types          |
 
 ## Decorators
 
@@ -283,27 +284,27 @@ export class ReentrancyGuard {
 
 ### Feature Showcase
 
-| Example | Description | Tests |
-|---------|-------------|-------|
+| Example              | Description                | Tests         |
+| -------------------- | -------------------------- | ------------- |
 | `examples/showcase/` | 132 Solidity features demo | Foundry tests |
 
 ### Basic Examples
 
-| Example | Description |
-|---------|-------------|
-| `examples/counter.ts` | Simple counter |
-| `examples/token.ts` | Basic ERC20 token |
-| `examples/erc20-mapping.ts` | ERC20 with mappings |
-| `examples/storage.ts` | Storage variables demo |
-| `examples/payable-vault.ts` | Payable vault |
+| Example                     | Description            |
+| --------------------------- | ---------------------- |
+| `examples/counter.ts`       | Simple counter         |
+| `examples/token.ts`         | Basic ERC20 token      |
+| `examples/erc20-mapping.ts` | ERC20 with mappings    |
+| `examples/storage.ts`       | Storage variables demo |
+| `examples/payable-vault.ts` | Payable vault          |
 
 ### DeFi Protocols
 
-| Example | Description | Tests |
-|---------|-------------|-------|
-| `examples/uniswapv2/` | Uniswap V2 AMM (Pair + Router) | Foundry tests |
+| Example               | Description                       | Tests         |
+| --------------------- | --------------------------------- | ------------- |
+| `examples/uniswapv2/` | Uniswap V2 AMM (Pair + Router)    | Foundry tests |
 | `examples/uniswapv3/` | Uniswap V3 Concentrated Liquidity | Foundry tests |
-| `examples/compound/` | Compound cToken Lending | - |
+| `examples/compound/`  | Compound cToken Lending           | -             |
 
 ### Run Example Tests
 
@@ -336,15 +337,15 @@ cd examples/uniswapv3 && forge test
 └─────────────────────────────────────────────────────────────┘
 ```
 
-| Module | File | Responsibility |
-|--------|------|----------------|
-| Parser | `src/parser/` | TypeScript parsing via ts-morph |
-| Analyzer | `src/analyzer/` | Semantic analysis, storage slot allocation |
-| Transformer | `src/transformer/` | TS AST → Yul AST conversion |
-| Printer | `src/yul/printer.ts` | Yul AST → formatted text |
-| EVM Types | `src/evm/types.ts` | EVM type system |
-| EVM Builtins | `src/evm/builtins.ts` | 73 EVM opcode definitions |
-| ABI | `src/evm/abi.ts` | Function selector computation, ABI encoding |
+| Module       | File                  | Responsibility                              |
+| ------------ | --------------------- | ------------------------------------------- |
+| Parser       | `src/parser/`         | TypeScript parsing via ts-morph             |
+| Analyzer     | `src/analyzer/`       | Semantic analysis, storage slot allocation  |
+| Transformer  | `src/transformer/`    | TS AST → Yul AST conversion                 |
+| Printer      | `src/yul/printer.ts`  | Yul AST → formatted text                    |
+| EVM Types    | `src/evm/types.ts`    | EVM type system                             |
+| EVM Builtins | `src/evm/builtins.ts` | 73 EVM opcode definitions                   |
+| ABI          | `src/evm/abi.ts`      | Function selector computation, ABI encoding |
 
 See [docs/architecture.md](docs/architecture.md) for details.
 
@@ -366,23 +367,23 @@ pnpm format           # Prettier formatting
 
 ### Test Coverage
 
-| Category | Tests |
-|----------|-------|
-| Type System | 19 |
-| Control Flow | 17 |
-| Reference Types | 14 |
-| ASM/Inline Assembly | 13 |
-| Unchecked Arithmetic | 12 |
-| External Calls | 11 |
-| Events | 11 |
-| Modifiers | 11 |
-| Calldata Arrays | 11 |
-| ABI Encoding | 11 |
-| Contract Creation | 10 |
-| Bytes Concat | 10 |
-| Inheritance | 8 |
-| And more... | ... |
-| **Total** | **288** |
+| Category             | Tests   |
+| -------------------- | ------- |
+| Type System          | 19      |
+| Control Flow         | 17      |
+| Reference Types      | 14      |
+| ASM/Inline Assembly  | 13      |
+| Unchecked Arithmetic | 12      |
+| External Calls       | 11      |
+| Events               | 11      |
+| Modifiers            | 11      |
+| Calldata Arrays      | 11      |
+| ABI Encoding         | 11      |
+| Contract Creation    | 10      |
+| Bytes Concat         | 10      |
+| Inheritance          | 8       |
+| And more...          | ...     |
+| **Total**            | **288** |
 
 ## Documentation
 
@@ -395,22 +396,22 @@ pnpm format           # Prettier formatting
 
 ts-to-yul implements **132 Solidity language features** with **100% coverage**:
 
-| Category | Features |
-|----------|----------|
-| Value Types | 10 |
-| Reference Types | 7 |
-| Global Variables | 18 |
-| Contract Structure | 14 |
-| Inheritance | 9 |
-| Events/Errors | 10 |
-| Control Structures | 9 |
-| Operators | 18 |
-| Address Operations | 8 |
-| ABI Encoding | 6 |
-| Type Information | 6 |
-| Contract Creation | 3 |
-| Units | 8 |
-| Other Features | 5 |
+| Category           | Features |
+| ------------------ | -------- |
+| Value Types        | 10       |
+| Reference Types    | 7        |
+| Global Variables   | 18       |
+| Contract Structure | 14       |
+| Inheritance        | 9        |
+| Events/Errors      | 10       |
+| Control Structures | 9        |
+| Operators          | 18       |
+| Address Operations | 8        |
+| ABI Encoding       | 6        |
+| Type Information   | 6        |
+| Contract Creation  | 3        |
+| Units              | 8        |
+| Other Features     | 5        |
 
 See [docs/solidity-comparison.md](docs/solidity-comparison.md) for the complete feature matrix.
 

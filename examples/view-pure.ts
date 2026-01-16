@@ -1,12 +1,4 @@
-import {
-  u256,
-  address,
-  storage,
-  Mapping,
-  msg,
-  view,
-  pure,
-} from "../runtime/index.js";
+import { u256, address, storage, Mapping, msg, view, pure } from "../runtime/index.js";
 
 /**
  * Contract demonstrating view and pure functions

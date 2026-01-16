@@ -80,11 +80,13 @@ export class Printer {
 
       case "rawCode":
         // Print raw Yul code with proper indentation
-        return stmt.code
-          .split("\n")
-          .filter((line) => line.trim())
-          .map((line) => this.indent() + line.trim())
-          .join("\n") + "\n";
+        return (
+          stmt.code
+            .split("\n")
+            .filter((line) => line.trim())
+            .map((line) => this.indent() + line.trim())
+            .join("\n") + "\n"
+        );
     }
   }
 
@@ -106,11 +108,7 @@ export class Printer {
     return result;
   }
 
-  private printSwitch(
-    expr: YulExpression,
-    cases: YulCase[],
-    default_?: YulStatement[]
-  ): string {
+  private printSwitch(expr: YulExpression, cases: YulCase[], default_?: YulStatement[]): string {
     let result = this.indent() + `switch ${this.printExpr(expr)}\n`;
 
     for (const c of cases) {

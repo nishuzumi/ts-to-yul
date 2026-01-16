@@ -74,10 +74,7 @@ export interface EventField {
 /**
  * Generate Ethereum ABI JSON from contract info
  */
-export function generateAbi(
-  contract: ContractInfo,
-  events: EventInfo[] = []
-): AbiItem[] {
+export function generateAbi(contract: ContractInfo, events: EventInfo[] = []): AbiItem[] {
   const abi: AbiItem[] = [];
 
   // Add constructor

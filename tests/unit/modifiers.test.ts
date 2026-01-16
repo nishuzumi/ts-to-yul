@@ -4,7 +4,9 @@ import type { AbiFunctionItem, AbiItem } from "../../src/evm/abiGenerator.js";
 
 // Helper to find function in ABI
 function findFunction(abi: AbiItem[], name: string): AbiFunctionItem | undefined {
-  return abi.find((item): item is AbiFunctionItem => item.type === "function" && item.name === name);
+  return abi.find(
+    (item): item is AbiFunctionItem => item.type === "function" && item.name === name
+  );
 }
 
 describe("Modifiers", () => {

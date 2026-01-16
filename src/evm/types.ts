@@ -58,9 +58,7 @@ function validateIntegerBits(bits: number, typeName: string): void {
  */
 function validateBytesSize(size: number, typeName: string): void {
   if (size < 1 || size > 32) {
-    throw new Error(
-      `Invalid type '${typeName}': bytes size must be 1-32, got ${size}`
-    );
+    throw new Error(`Invalid type '${typeName}': bytes size must be 1-32, got ${size}`);
   }
 }
 

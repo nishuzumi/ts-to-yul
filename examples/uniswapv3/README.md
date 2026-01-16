@@ -44,6 +44,7 @@ node dist/cli.js build examples/uniswapv3/src/UniswapV3Pool.ts -O -o examples/un
 ## Testing
 
 The test suite includes 30 tests covering:
+
 - Initialization
 - Minting (in-range, below-range, above-range positions)
 - Burning
@@ -62,12 +63,14 @@ forge test -vv
 ### Q64.96 Fixed-Point
 
 The sqrt price is stored in Q64.96 format where:
+
 - `Q96 = 2^96 = 79228162514264337593543950336`
 - Price = 1.0 corresponds to sqrtPriceX96 = Q96
 
 ### Tick Ranges
 
 Liquidity positions are defined by tick ranges:
+
 - Ticks range from -887272 to +887272
 - A tick of 0 corresponds to price = 1.0
 - Positive ticks = price > 1.0
@@ -76,6 +79,7 @@ Liquidity positions are defined by tick ranges:
 ### Token Amounts
 
 When minting liquidity:
+
 - Position below current price: only token1 required
 - Position above current price: only token0 required
 - Position containing current price: both tokens required
@@ -83,6 +87,7 @@ When minting liquidity:
 ## Differences from Official Uniswap V3
 
 This is a simplified implementation for demonstration:
+
 - Simplified tick math (approximation)
 - Single position per user
 - No tick crossing during swaps

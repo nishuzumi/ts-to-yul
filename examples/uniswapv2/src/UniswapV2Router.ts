@@ -1,12 +1,4 @@
-import {
-  u256,
-  address,
-  storage,
-  msg,
-  revert,
-  view,
-  Mapping,
-} from "../../../runtime/index.js";
+import { u256, address, storage, msg, revert, view, Mapping } from "../../../runtime/index.js";
 
 /**
  * UniswapV2 Router - User-friendly interface for AMM operations
@@ -186,11 +178,7 @@ export class UniswapV2Router {
    * @param amount1Min Minimum amount of token1 to receive
    * @returns amount0 The amount of token0 received
    */
-  public removeLiquidity(
-    liquidityAmount: u256,
-    amount0Min: u256,
-    amount1Min: u256
-  ): u256 {
+  public removeLiquidity(liquidityAmount: u256, amount0Min: u256, amount1Min: u256): u256 {
     const sender = msg.sender;
 
     if (this.liquidity[sender] < liquidityAmount) {
@@ -227,10 +215,7 @@ export class UniswapV2Router {
    * @param amountOutMin Minimum token1 output (slippage protection)
    * @returns amountOut The actual token1 received
    */
-  public swapExactToken0ForToken1(
-    amountIn: u256,
-    amountOutMin: u256
-  ): u256 {
+  public swapExactToken0ForToken1(amountIn: u256, amountOutMin: u256): u256 {
     if (amountIn === 0n) {
       revert("Router: INSUFFICIENT_INPUT_AMOUNT");
     }
@@ -259,10 +244,7 @@ export class UniswapV2Router {
    * @param amountOutMin Minimum token0 output (slippage protection)
    * @returns amountOut The actual token0 received
    */
-  public swapExactToken1ForToken0(
-    amountIn: u256,
-    amountOutMin: u256
-  ): u256 {
+  public swapExactToken1ForToken0(amountIn: u256, amountOutMin: u256): u256 {
     if (amountIn === 0n) {
       revert("Router: INSUFFICIENT_INPUT_AMOUNT");
     }
@@ -291,10 +273,7 @@ export class UniswapV2Router {
    * @param amountInMax Maximum token0 input (slippage protection)
    * @returns amountIn The actual token0 spent
    */
-  public swapToken0ForExactToken1(
-    amountOut: u256,
-    amountInMax: u256
-  ): u256 {
+  public swapToken0ForExactToken1(amountOut: u256, amountInMax: u256): u256 {
     if (amountOut === 0n) {
       revert("Router: INSUFFICIENT_OUTPUT_AMOUNT");
     }
@@ -319,10 +298,7 @@ export class UniswapV2Router {
    * @param amountInMax Maximum token1 input (slippage protection)
    * @returns amountIn The actual token1 spent
    */
-  public swapToken1ForExactToken0(
-    amountOut: u256,
-    amountInMax: u256
-  ): u256 {
+  public swapToken1ForExactToken0(amountOut: u256, amountInMax: u256): u256 {
     if (amountOut === 0n) {
       revert("Router: INSUFFICIENT_OUTPUT_AMOUNT");
     }

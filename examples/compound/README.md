@@ -47,13 +47,13 @@ interface ICToken {
 
 ## Key Parameters
 
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| Initial Exchange Rate | 0.02 | 1 cToken = 0.02 underlying |
-| Collateral Factor | 75% | Maximum borrow = 75% of collateral |
-| Reserve Factor | 10% | Protocol takes 10% of interest |
-| Base Borrow Rate | ~5% APY | Base interest rate |
-| Liquidation Incentive | 8% | Liquidator bonus |
+| Parameter             | Value   | Description                        |
+| --------------------- | ------- | ---------------------------------- |
+| Initial Exchange Rate | 0.02    | 1 cToken = 0.02 underlying         |
+| Collateral Factor     | 75%     | Maximum borrow = 75% of collateral |
+| Reserve Factor        | 10%     | Protocol takes 10% of interest     |
+| Base Borrow Rate      | ~5% APY | Base interest rate                 |
+| Liquidation Incentive | 8%      | Liquidator bonus                   |
 
 ## Building
 
@@ -68,6 +68,7 @@ node dist/cli.js build examples/compound/src/CToken.ts -O -o examples/compound/b
 ## Testing
 
 The test suite includes 40 tests covering:
+
 - Initialization and exchange rate
 - Minting and redeeming
 - Borrowing and repaying
@@ -111,6 +112,7 @@ supplyRate = borrowRate * utilizationRate * (1 - reserveFactor)
 ## Differences from Official Compound
 
 This is a simplified implementation for demonstration:
+
 - Single asset market (no Comptroller)
 - Simplified interest rate model
 - No flash loans

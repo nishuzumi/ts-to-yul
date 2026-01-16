@@ -12,11 +12,7 @@ import { Q96 } from "./TickMath.js";
  * Calculate amount0 delta between two sqrt prices
  * amount0 = liquidity * (1/sqrtPriceLower - 1/sqrtPriceUpper)
  */
-export function getAmount0Delta(
-  sqrtRatioAX96: u160,
-  sqrtRatioBX96: u160,
-  liquidity: u128
-): u256 {
+export function getAmount0Delta(sqrtRatioAX96: u160, sqrtRatioBX96: u160, liquidity: u128): u256 {
   // Ensure sqrtRatioA <= sqrtRatioB
   let sqrtPriceLower = sqrtRatioAX96;
   let sqrtPriceUpper = sqrtRatioBX96;
@@ -39,11 +35,7 @@ export function getAmount0Delta(
  * Calculate amount1 delta between two sqrt prices
  * amount1 = liquidity * (sqrtPriceUpper - sqrtPriceLower)
  */
-export function getAmount1Delta(
-  sqrtRatioAX96: u160,
-  sqrtRatioBX96: u160,
-  liquidity: u128
-): u256 {
+export function getAmount1Delta(sqrtRatioAX96: u160, sqrtRatioBX96: u160, liquidity: u128): u256 {
   let sqrtPriceLower = sqrtRatioAX96;
   let sqrtPriceUpper = sqrtRatioBX96;
   if (sqrtRatioAX96 > sqrtRatioBX96) {

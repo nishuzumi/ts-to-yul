@@ -246,6 +246,4 @@ describe("Global Variables", () => {
       expect(result.yul).toContain("blobhash(");
     });
   });
-
 });
-

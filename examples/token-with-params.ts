@@ -1,12 +1,4 @@
-import {
-  u256,
-  address,
-  bool,
-  storage,
-  Mapping,
-  msg,
-  revert,
-} from "../runtime/index.js";
+import { u256, address, bool, storage, Mapping, msg, revert } from "../runtime/index.js";
 
 /**
  * ERC20 Token with constructor parameters

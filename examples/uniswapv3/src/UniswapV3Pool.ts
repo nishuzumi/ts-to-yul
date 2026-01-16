@@ -87,11 +87,7 @@ export class UniswapV3Pool {
 
   @view
   public getPosition(owner: address): [u128, i24, i24] {
-    return [
-      this.positions[owner],
-      this.positionTickLower[owner],
-      this.positionTickUpper[owner],
-    ];
+    return [this.positions[owner], this.positionTickLower[owner], this.positionTickUpper[owner]];
   }
 
   @view
@@ -133,11 +129,7 @@ export class UniswapV3Pool {
   /**
    * Add liquidity to a position
    */
-  public mint(
-    tickLower: i24,
-    tickUpper: i24,
-    amount: u128
-  ): [u256, u256] {
+  public mint(tickLower: i24, tickUpper: i24, amount: u128): [u256, u256] {
     if (this.initialized === 0n) {
       revert("NI");
     }
@@ -266,11 +258,7 @@ export class UniswapV3Pool {
     );
 
     // Calculate output amount
-    const amountOut = this._getAmount1Delta(
-      sqrtPriceNextX96,
-      this.sqrtPriceX96,
-      this.liquidity
-    );
+    const amountOut = this._getAmount1Delta(sqrtPriceNextX96, this.sqrtPriceX96, this.liquidity);
 
     // Update price (respect limit)
     if (sqrtPriceNextX96 >= sqrtPriceLimitX96) {
@@ -284,8 +272,8 @@ export class UniswapV3Pool {
 
     // Update fee growth
     if (this.liquidity > 0n) {
-      this.feeGrowthGlobal0X128 = this.feeGrowthGlobal0X128 +
-        ((feeAmount * (1n << 128n)) / this.liquidity);
+      this.feeGrowthGlobal0X128 =
+        this.feeGrowthGlobal0X128 + (feeAmount * (1n << 128n)) / this.liquidity;
     }
 
     return amountOut;
@@ -323,11 +311,7 @@ export class UniswapV3Pool {
     );
 
     // Calculate output amount
-    const amountOut = this._getAmount0Delta(
-      this.sqrtPriceX96,
-      sqrtPriceNextX96,
-      this.liquidity
-    );
+    const amountOut = this._getAmount0Delta(this.sqrtPriceX96, sqrtPriceNextX96, this.liquidity);
 
     // Update price (respect limit)
     if (sqrtPriceNextX96 <= sqrtPriceLimitX96) {
@@ -341,8 +325,8 @@ export class UniswapV3Pool {
 
     // Update fee growth
     if (this.liquidity > 0n) {
-      this.feeGrowthGlobal1X128 = this.feeGrowthGlobal1X128 +
-        ((feeAmount * (1n << 128n)) / this.liquidity);
+      this.feeGrowthGlobal1X128 =
+        this.feeGrowthGlobal1X128 + (feeAmount * (1n << 128n)) / this.liquidity;
     }
 
     return amountOut;
@@ -651,11 +635,7 @@ export class UniswapV3Pool {
   /**
    * Calculate amount0 delta
    */
-  private _getAmount0Delta(
-    sqrtRatioAX96: u160,
-    sqrtRatioBX96: u160,
-    liquidity: u128
-  ): u256 {
+  private _getAmount0Delta(sqrtRatioAX96: u160, sqrtRatioBX96: u160, liquidity: u128): u256 {
     let sqrtPriceLower = sqrtRatioAX96;
     let sqrtPriceUpper = sqrtRatioBX96;
     if (sqrtRatioAX96 > sqrtRatioBX96) {
@@ -676,11 +656,7 @@ export class UniswapV3Pool {
   /**
    * Calculate amount1 delta
    */
-  private _getAmount1Delta(
-    sqrtRatioAX96: u160,
-    sqrtRatioBX96: u160,
-    liquidity: u128
-  ): u256 {
+  private _getAmount1Delta(sqrtRatioAX96: u160, sqrtRatioBX96: u160, liquidity: u128): u256 {
     let sqrtPriceLower = sqrtRatioAX96;
     let sqrtPriceUpper = sqrtRatioBX96;
     if (sqrtRatioAX96 > sqrtRatioBX96) {
@@ -694,11 +670,7 @@ export class UniswapV3Pool {
   /**
    * Get next sqrt price from amount0
    */
-  private _getNextSqrtPriceFromAmount0(
-    sqrtPriceX96: u160,
-    liquidity: u128,
-    amount: u256
-  ): u160 {
+  private _getNextSqrtPriceFromAmount0(sqrtPriceX96: u160, liquidity: u128, amount: u256): u160 {
     if (amount === 0n) {
       return sqrtPriceX96;
     }
@@ -716,11 +688,7 @@ export class UniswapV3Pool {
   /**
    * Get next sqrt price from amount1
    */
-  private _getNextSqrtPriceFromAmount1(
-    sqrtPriceX96: u160,
-    liquidity: u128,
-    amount: u256
-  ): u160 {
+  private _getNextSqrtPriceFromAmount1(sqrtPriceX96: u160, liquidity: u128, amount: u256): u160 {
     if (amount === 0n) {
       return sqrtPriceX96;
     }

@@ -1,12 +1,4 @@
-import {
-  u256,
-  address,
-  bool,
-  storage,
-  Mapping,
-  msg,
-  revert,
-} from "../../../runtime/index.js";
+import { u256, address, bool, storage, Mapping, msg, revert } from "../../../runtime/index.js";
 
 /**
  * UniswapV2 ERC20 LP Token

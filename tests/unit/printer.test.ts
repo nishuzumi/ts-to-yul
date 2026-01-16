@@ -21,9 +21,7 @@ describe("Printer", () => {
   it("should print variable declaration", () => {
     const obj: YulObject = {
       name: "Test",
-      code: [
-        { type: "variableDeclaration", names: ["x"], value: { type: "literal", value: 42n } },
-      ],
+      code: [{ type: "variableDeclaration", names: ["x"], value: { type: "literal", value: 42n } }],
       subObjects: [],
       data: new Map(),
     };

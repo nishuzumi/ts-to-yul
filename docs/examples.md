@@ -25,6 +25,7 @@ export class Counter {
 ```
 
 **编译运行**:
+
 ```bash
 node dist/cli.js build examples/counter.ts -O -o counter.hex
 ```
@@ -34,6 +35,7 @@ node dist/cli.js build examples/counter.ts -O -o counter.hex
 基础 ERC20 代币实现，演示 Mapping 和事件。
 
 **功能**:
+
 - `balanceOf(address)` - 查询余额
 - `transfer(address, uint256)` - 转账
 - `approve(address, uint256)` - 授权
@@ -61,6 +63,7 @@ public deposit(): void {
 Uniswap V2 AMM (自动做市商) 实现。
 
 **文件结构**:
+
 ```
 examples/uniswapv2/
 ├── src/
@@ -75,12 +78,14 @@ examples/uniswapv2/
 ```
 
 **核心功能**:
+
 - `mint()` - 添加流动性，铸造 LP 代币
 - `burn()` - 移除流动性，销毁 LP 代币
 - `swap()` - 代币交换
 - `getReserves()` - 获取储备量
 
 **运行测试**:
+
 ```bash
 cd examples/uniswapv2
 node ../../dist/cli.js build src/UniswapV2Pair.ts -O -o bytecode.hex
@@ -92,6 +97,7 @@ forge test -vv
 Uniswap V3 集中流动性实现，演示有符号整数处理。
 
 **文件结构**:
+
 ```
 examples/uniswapv3/
 ├── src/
@@ -105,12 +111,14 @@ examples/uniswapv3/
 ```
 
 **核心功能**:
+
 - `mint()` - 在指定价格区间添加流动性
 - `burn()` - 移除流动性
 - `swap()` - 代币交换
 - `collect()` - 收集手续费
 
 **有符号整数使用**:
+
 ```typescript
 @storage tick: i32 = 0;  // 当前价格 tick (可为负)
 
@@ -120,6 +128,7 @@ if (tick > tickUpper) { ... }
 ```
 
 **运行测试**:
+
 ```bash
 cd examples/uniswapv3
 node ../../dist/cli.js build src/UniswapV3Pool.ts -O -o bytecode.hex
@@ -131,6 +140,7 @@ forge test -vv
 Compound cToken 借贷协议实现。
 
 **文件结构**:
+
 ```
 examples/compound/
 ├── src/
@@ -142,6 +152,7 @@ examples/compound/
 ```
 
 **核心功能**:
+
 - `mint(amount)` - 存款，铸造 cToken
 - `redeem(tokens)` - 赎回 cToken
 - `borrow(amount)` - 借款
@@ -158,11 +169,13 @@ examples/compound/
 | 清算奖励 | 8% | 清算人获得 8% 奖励 |
 
 **汇率计算**:
+
 ```
 exchangeRate = (totalCash + totalBorrows - totalReserves) / totalSupply
 ```
 
 **运行测试**:
+
 ```bash
 cd examples/compound
 node ../../dist/cli.js build src/CToken.ts -O -o bytecode.hex
@@ -221,6 +234,7 @@ forge test --match-test testFuzz -vv
 5. 配置 `foundry.toml`
 
 **foundry.toml 模板**:
+
 ```toml
 [profile.default]
 src = "src"

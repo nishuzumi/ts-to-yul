@@ -3,15 +3,7 @@
  * Library = class with only static methods
  * Corresponds to Solidity: library MathLib { ... }
  */
-import {
-  u256,
-  i256,
-  bool,
-  pure,
-  view,
-  revert,
-  unchecked,
-} from "../../../../runtime/index.js";
+import { u256, i256, bool, pure, view, revert, unchecked } from "../../../../runtime/index.js";
 
 // Custom error for math operations
 declare function MathOverflow(): never;
@@ -137,22 +129,22 @@ export class MathLib {
   @pure
   static compoundOps(a: u256, b: u256): u256 {
     let result = a;
-    result += b;      // result = result + b
-    result -= 1n;     // result = result - 1
-    result *= 2n;     // result = result * 2
-    result /= 2n;     // result = result / 2
+    result += b; // result = result + b
+    result -= 1n; // result = result - 1
+    result *= 2n; // result = result * 2
+    result /= 2n; // result = result / 2
     return result;
   }
 
   // ==================== FEATURE: bitwise operators ====================
   @pure
   static bitwiseOps(a: u256, b: u256): [u256, u256, u256, u256, u256, u256] {
-    const andResult = a & b;       // AND
-    const orResult = a | b;        // OR
-    const xorResult = a ^ b;       // XOR
-    const notResult = ~a;          // NOT (complement)
-    const leftShift = a << 2n;     // Left shift
-    const rightShift = b >> 1n;    // Right shift
+    const andResult = a & b; // AND
+    const orResult = a | b; // OR
+    const xorResult = a ^ b; // XOR
+    const notResult = ~a; // NOT (complement)
+    const leftShift = a << 2n; // Left shift
+    const rightShift = b >> 1n; // Right shift
     return [andResult, orResult, xorResult, notResult, leftShift, rightShift];
   }
 

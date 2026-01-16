@@ -27,7 +27,11 @@ import {
   NewExpression,
 } from "ts-morph";
 import type { YulObject, YulStatement, YulExpression } from "../yul/ast.js";
-import { computeSelector, computeSelectorFromSignature, computeEventSignature } from "../evm/abi.js";
+import {
+  computeSelector,
+  computeSelectorFromSignature,
+  computeEventSignature,
+} from "../evm/abi.js";
 import {
   mapType,
   fromSolidityType,
@@ -425,7 +429,9 @@ export class Transformer {
    */
   private parseStructDefinition(
     iface: ReturnType<
-      ReturnType<typeof import("ts-morph").ClassDeclaration.prototype.getSourceFile>["getInterfaces"]
+      ReturnType<
+        typeof import("ts-morph").ClassDeclaration.prototype.getSourceFile
+      >["getInterfaces"]
     >[number],
     name: string
   ): void {
@@ -908,7 +914,11 @@ export class Transformer {
     if (!typeNode) return false;
     const typeText = typeNode.getText();
     // Check for TypeScript array syntax: u256[] or Array<u256>
-    return typeText.endsWith("[]") || typeText.startsWith("Array<") || typeText.startsWith("StorageArray<");
+    return (
+      typeText.endsWith("[]") ||
+      typeText.startsWith("Array<") ||
+      typeText.startsWith("StorageArray<")
+    );
   }
 
   /**
@@ -943,7 +953,10 @@ export class Transformer {
     // For Mapping<address, User>, remaining is "address, User>>"
     // For Mapping<address, Mapping<address, u256>>, remaining is "address, address, u256>>>"
     // We want the last type before the closing >
-    const parts = remaining.replace(/>/g, "").split(",").map((s) => s.trim());
+    const parts = remaining
+      .replace(/>/g, "")
+      .split(",")
+      .map((s) => s.trim());
     const valueType = parts.length > 0 ? parts[parts.length - 1] : undefined;
 
     if (valueType) {
@@ -1093,7 +1106,10 @@ export class Transformer {
   /**
    * Resolve a class by name, checking both the current file and imports.
    */
-  private resolveClass(sourceFile: ReturnType<ClassDeclaration["getSourceFile"]>, className: string): ClassDeclaration | undefined {
+  private resolveClass(
+    sourceFile: ReturnType<ClassDeclaration["getSourceFile"]>,
+    className: string
+  ): ClassDeclaration | undefined {
     // First, look in the same file
     const localClass = sourceFile.getClass(className);
     if (localClass) {
@@ -1226,7 +1242,13 @@ export class Transformer {
           const byteSize = this.getTypeByteSize(typeText);
 
           // Determine if this type can be packed
-          const canPack = !isMapping && !isArray && !isStruct && !isFixedArray && !isDynamicBytes && !isDynamicString;
+          const canPack =
+            !isMapping &&
+            !isArray &&
+            !isStruct &&
+            !isFixedArray &&
+            !isDynamicBytes &&
+            !isDynamicString;
 
           // Calculate slots needed for non-packable types
           let slotsNeeded = 1n;
@@ -1370,7 +1392,11 @@ export class Transformer {
         const decoratorNames = prop.getDecorators().map((d) => d.getName());
 
         // Skip storage, event, and immutable properties
-        if (decoratorNames.includes("storage") || decoratorNames.includes("event") || decoratorNames.includes("immutable")) {
+        if (
+          decoratorNames.includes("storage") ||
+          decoratorNames.includes("event") ||
+          decoratorNames.includes("immutable")
+        ) {
           continue;
         }
 
@@ -1633,7 +1659,9 @@ export class Transformer {
     }
 
     // Add dynamic bytes helpers if any dynamic bytes/string are used
-    const hasDynamicBytes = Array.from(this.storage.values()).some((s) => s.isDynamicBytes || s.isDynamicString);
+    const hasDynamicBytes = Array.from(this.storage.values()).some(
+      (s) => s.isDynamicBytes || s.isDynamicString
+    );
     if (hasDynamicBytes) {
       statements.push(this.generateBytesLoadHelper());
       statements.push(this.generateBytesStoreHelper());
@@ -1651,7 +1679,10 @@ export class Transformer {
 
   private generateDeployedCode(inheritanceChain: ClassDeclaration[]): YulStatement[] {
     // Collect all methods from the inheritance chain, tracking which class they belong to
-    const methodsByClass: Map<string, { classDecl: ClassDeclaration; method: MethodDeclaration }[]> = new Map();
+    const methodsByClass: Map<
+      string,
+      { classDecl: ClassDeclaration; method: MethodDeclaration }[]
+    > = new Map();
     const methodNames: Set<string> = new Set();
     const overriddenMethods: Set<string> = new Set(); // Methods that exist in multiple classes
 
@@ -1687,7 +1718,10 @@ export class Transformer {
         const parentHasMethod = parentClass.getMethods().some((m) => m.getName() === methodName);
         if (parentHasMethod) {
           // Store: when in childClass and calling super.methodName, call parentClassName_methodName
-          this.parentMethods.set(`${childClassName}:${methodName}`, `${parentClassName}_${methodName}`);
+          this.parentMethods.set(
+            `${childClassName}:${methodName}`,
+            `${parentClassName}_${methodName}`
+          );
         }
       }
     }
@@ -1778,7 +1812,8 @@ export class Transformer {
       // Build param metadata for ABI decoding
       const paramMetas: ParamMeta[] = params.map((p) => {
         const typeName = p.getTypeNode()?.getText() ?? "u256";
-        const isDynamicArray = typeName.startsWith("CalldataArray<") ||
+        const isDynamicArray =
+          typeName.startsWith("CalldataArray<") ||
           (typeName.endsWith("[]") && !typeName.includes("StorageArray"));
         return {
           name: p.getName(),
@@ -1801,9 +1836,7 @@ export class Transformer {
     const statements: YulStatement[] = [];
 
     // Generate dispatcher with fallback/receive support
-    statements.push(
-      this.generateDispatcher(functionMetas, !!fallbackMethod, !!receiveMethod)
-    );
+    statements.push(this.generateDispatcher(functionMetas, !!fallbackMethod, !!receiveMethod));
 
     // Generate regular public function definitions
     for (const method of regularMethods) {
@@ -1849,7 +1882,9 @@ export class Transformer {
     }
 
     // Add dynamic bytes helpers if any dynamic bytes/string are used
-    const hasDynamicBytes = Array.from(this.storage.values()).some((s) => s.isDynamicBytes || s.isDynamicString);
+    const hasDynamicBytes = Array.from(this.storage.values()).some(
+      (s) => s.isDynamicBytes || s.isDynamicString
+    );
     if (hasDynamicBytes) {
       statements.push(this.generateBytesLoadHelper());
       statements.push(this.generateBytesStoreHelper());
@@ -1955,7 +1990,10 @@ export class Transformer {
       expr: {
         type: "functionCall",
         name: "mstore",
-        args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: length }],
+        args: [
+          { type: "identifier", name: "ptr" },
+          { type: "literal", value: length },
+        ],
       },
     });
 
@@ -1971,7 +2009,10 @@ export class Transformer {
             {
               type: "functionCall",
               name: "add",
-              args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: offset }],
+              args: [
+                { type: "identifier", name: "ptr" },
+                { type: "literal", value: offset },
+              ],
             },
             { type: "literal", value: words[i]! },
           ],
@@ -1991,7 +2032,10 @@ export class Transformer {
           {
             type: "functionCall",
             name: "add",
-            args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: totalSize }],
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "literal", value: totalSize },
+            ],
           },
         ],
       },
@@ -2035,7 +2079,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "size" }],
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "identifier", name: "size" },
+            ],
           },
         },
         // codecopy(add(ptr, 32), 0, size)  // Copy code to memory after length
@@ -2048,7 +2095,10 @@ export class Transformer {
               {
                 type: "functionCall",
                 name: "add",
-                args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }],
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "literal", value: 32n },
+                ],
               },
               { type: "literal", value: 0n },
               { type: "identifier", name: "size" },
@@ -2079,7 +2129,10 @@ export class Transformer {
                           {
                             type: "functionCall",
                             name: "add",
-                            args: [{ type: "identifier", name: "size" }, { type: "literal", value: 32n }],
+                            args: [
+                              { type: "identifier", name: "size" },
+                              { type: "literal", value: 32n },
+                            ],
                           },
                           { type: "literal", value: 31n },
                         ],
@@ -2128,7 +2181,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 0n }],
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "literal", value: 0n },
+            ],
           },
         },
         // Update free memory pointer
@@ -2142,7 +2198,10 @@ export class Transformer {
               {
                 type: "functionCall",
                 name: "add",
-                args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }],
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "literal", value: 32n },
+                ],
               },
             ],
           },
@@ -2191,7 +2250,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "size" }],
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "identifier", name: "size" },
+            ],
           },
         },
         // datacopy(add(ptr, 32), dataoffset("ContractName"), size)
@@ -2204,7 +2266,10 @@ export class Transformer {
               {
                 type: "functionCall",
                 name: "add",
-                args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }],
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "literal", value: 32n },
+                ],
               },
               {
                 type: "functionCall",
@@ -2231,7 +2296,10 @@ export class Transformer {
                   {
                     type: "functionCall",
                     name: "add",
-                    args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }],
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "literal", value: 32n },
+                    ],
                   },
                   {
                     type: "functionCall",
@@ -2240,7 +2308,10 @@ export class Transformer {
                       {
                         type: "functionCall",
                         name: "add",
-                        args: [{ type: "identifier", name: "size" }, { type: "literal", value: 31n }],
+                        args: [
+                          { type: "identifier", name: "size" },
+                          { type: "literal", value: 31n },
+                        ],
                       },
                       {
                         type: "functionCall",
@@ -2632,42 +2703,141 @@ export class Transformer {
             name: "mstore",
             args: [
               { type: "identifier", name: "ptr" },
-              { type: "functionCall", name: "mul", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 32n }] },
+              {
+                type: "functionCall",
+                name: "mul",
+                args: [
+                  { type: "identifier", name: "numArgs" },
+                  { type: "literal", value: 32n },
+                ],
+              },
             ],
           },
         },
         // if gt(numArgs, 0) { mstore(add(ptr, 32), arg0) }
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 0n }] },
-          body: [{
-            type: "expression",
-            expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }] }, { type: "identifier", name: "arg0" }] },
-          }],
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 0n },
+            ],
+          },
+          body: [
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "literal", value: 32n },
+                    ],
+                  },
+                  { type: "identifier", name: "arg0" },
+                ],
+              },
+            },
+          ],
         },
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 1n }] },
-          body: [{
-            type: "expression",
-            expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 64n }] }, { type: "identifier", name: "arg1" }] },
-          }],
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 1n },
+            ],
+          },
+          body: [
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "literal", value: 64n },
+                    ],
+                  },
+                  { type: "identifier", name: "arg1" },
+                ],
+              },
+            },
+          ],
         },
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 2n }] },
-          body: [{
-            type: "expression",
-            expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 96n }] }, { type: "identifier", name: "arg2" }] },
-          }],
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 2n },
+            ],
+          },
+          body: [
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "literal", value: 96n },
+                    ],
+                  },
+                  { type: "identifier", name: "arg2" },
+                ],
+              },
+            },
+          ],
         },
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 3n }] },
-          body: [{
-            type: "expression",
-            expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 128n }] }, { type: "identifier", name: "arg3" }] },
-          }],
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 3n },
+            ],
+          },
+          body: [
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "literal", value: 128n },
+                    ],
+                  },
+                  { type: "identifier", name: "arg3" },
+                ],
+              },
+            },
+          ],
         },
         // Update free memory pointer: mstore(0x40, add(ptr, add(32, mul(numArgs, 32))))
         {
@@ -2677,7 +2847,28 @@ export class Transformer {
             name: "mstore",
             args: [
               { type: "literal", value: 0x40n },
-              { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "functionCall", name: "add", args: [{ type: "literal", value: 32n }, { type: "functionCall", name: "mul", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 32n }] }] }] },
+              {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "literal", value: 32n },
+                      {
+                        type: "functionCall",
+                        name: "mul",
+                        args: [
+                          { type: "identifier", name: "numArgs" },
+                          { type: "literal", value: 32n },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           },
         },
@@ -2712,34 +2903,174 @@ export class Transformer {
         },
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 0n }] },
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 0n },
+            ],
+          },
           body: [
-            { type: "expression", expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "offset" }] }, { type: "identifier", name: "arg0" }] } },
-            { type: "assignment", names: ["offset"], value: { type: "functionCall", name: "add", args: [{ type: "identifier", name: "offset" }, { type: "literal", value: 32n }] } },
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "identifier", name: "offset" },
+                    ],
+                  },
+                  { type: "identifier", name: "arg0" },
+                ],
+              },
+            },
+            {
+              type: "assignment",
+              names: ["offset"],
+              value: {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "offset" },
+                  { type: "literal", value: 32n },
+                ],
+              },
+            },
           ],
         },
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 1n }] },
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 1n },
+            ],
+          },
           body: [
-            { type: "expression", expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "offset" }] }, { type: "identifier", name: "arg1" }] } },
-            { type: "assignment", names: ["offset"], value: { type: "functionCall", name: "add", args: [{ type: "identifier", name: "offset" }, { type: "literal", value: 32n }] } },
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "identifier", name: "offset" },
+                    ],
+                  },
+                  { type: "identifier", name: "arg1" },
+                ],
+              },
+            },
+            {
+              type: "assignment",
+              names: ["offset"],
+              value: {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "offset" },
+                  { type: "literal", value: 32n },
+                ],
+              },
+            },
           ],
         },
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 2n }] },
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 2n },
+            ],
+          },
           body: [
-            { type: "expression", expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "offset" }] }, { type: "identifier", name: "arg2" }] } },
-            { type: "assignment", names: ["offset"], value: { type: "functionCall", name: "add", args: [{ type: "identifier", name: "offset" }, { type: "literal", value: 32n }] } },
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "identifier", name: "offset" },
+                    ],
+                  },
+                  { type: "identifier", name: "arg2" },
+                ],
+              },
+            },
+            {
+              type: "assignment",
+              names: ["offset"],
+              value: {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "offset" },
+                  { type: "literal", value: 32n },
+                ],
+              },
+            },
           ],
         },
         {
           type: "if",
-          condition: { type: "functionCall", name: "gt", args: [{ type: "identifier", name: "numArgs" }, { type: "literal", value: 3n }] },
+          condition: {
+            type: "functionCall",
+            name: "gt",
+            args: [
+              { type: "identifier", name: "numArgs" },
+              { type: "literal", value: 3n },
+            ],
+          },
           body: [
-            { type: "expression", expr: { type: "functionCall", name: "mstore", args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "offset" }] }, { type: "identifier", name: "arg3" }] } },
-            { type: "assignment", names: ["offset"], value: { type: "functionCall", name: "add", args: [{ type: "identifier", name: "offset" }, { type: "literal", value: 32n }] } },
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "mstore",
+                args: [
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "identifier", name: "offset" },
+                    ],
+                  },
+                  { type: "identifier", name: "arg3" },
+                ],
+              },
+            },
+            {
+              type: "assignment",
+              names: ["offset"],
+              value: {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "offset" },
+                  { type: "literal", value: 32n },
+                ],
+              },
+            },
           ],
         },
         // Update free memory pointer
@@ -2748,7 +3079,17 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "literal", value: 0x40n }, { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "offset" }] }],
+            args: [
+              { type: "literal", value: 0x40n },
+              {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "identifier", name: "offset" },
+                ],
+              },
+            ],
           },
         },
       ],
@@ -2774,7 +3115,16 @@ export class Transformer {
           value: {
             type: "functionCall",
             name: "mload",
-            args: [{ type: "functionCall", name: "add", args: [{ type: "identifier", name: "data" }, { type: "literal", value: 0n }] }],
+            args: [
+              {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "data" },
+                  { type: "literal", value: 0n },
+                ],
+              },
+            ],
           },
         },
       ],
@@ -2801,17 +3151,38 @@ export class Transformer {
             name: "mstore",
             args: [
               { type: "literal", value: 0n },
-              { type: "functionCall", name: "shl", args: [{ type: "literal", value: 224n }, { type: "identifier", name: "selector" }] },
+              {
+                type: "functionCall",
+                name: "shl",
+                args: [
+                  { type: "literal", value: 224n },
+                  { type: "identifier", name: "selector" },
+                ],
+              },
             ],
           },
         },
         {
           type: "expression",
-          expr: { type: "functionCall", name: "mstore", args: [{ type: "literal", value: 4n }, { type: "identifier", name: "arg0" }] },
+          expr: {
+            type: "functionCall",
+            name: "mstore",
+            args: [
+              { type: "literal", value: 4n },
+              { type: "identifier", name: "arg0" },
+            ],
+          },
         },
         {
           type: "expression",
-          expr: { type: "functionCall", name: "mstore", args: [{ type: "literal", value: 36n }, { type: "identifier", name: "arg1" }] },
+          expr: {
+            type: "functionCall",
+            name: "mstore",
+            args: [
+              { type: "literal", value: 36n },
+              { type: "identifier", name: "arg1" },
+            ],
+          },
         },
         // delegatecall(gas, target, inOffset, inSize, outOffset, outSize)
         {
@@ -2833,8 +3204,24 @@ export class Transformer {
         // if iszero(success) { revert(0, 0) }
         {
           type: "if",
-          condition: { type: "functionCall", name: "iszero", args: [{ type: "identifier", name: "success" }] },
-          body: [{ type: "expression", expr: { type: "functionCall", name: "revert", args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }] } }],
+          condition: {
+            type: "functionCall",
+            name: "iszero",
+            args: [{ type: "identifier", name: "success" }],
+          },
+          body: [
+            {
+              type: "expression",
+              expr: {
+                type: "functionCall",
+                name: "revert",
+                args: [
+                  { type: "literal", value: 0n },
+                  { type: "literal", value: 0n },
+                ],
+              },
+            },
+          ],
         },
         // result := mload(0)
         {
@@ -3263,7 +3650,10 @@ export class Transformer {
               expr: {
                 type: "functionCall",
                 name: "revert",
-                args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }],
+                args: [
+                  { type: "literal", value: 0n },
+                  { type: "literal", value: 0n },
+                ],
               },
             },
           ],
@@ -3285,7 +3675,10 @@ export class Transformer {
               expr: {
                 type: "functionCall",
                 name: "revert",
-                args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }],
+                args: [
+                  { type: "literal", value: 0n },
+                  { type: "literal", value: 0n },
+                ],
               },
             },
           ],
@@ -3307,7 +3700,10 @@ export class Transformer {
               expr: {
                 type: "functionCall",
                 name: "revert",
-                args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }],
+                args: [
+                  { type: "literal", value: 0n },
+                  { type: "literal", value: 0n },
+                ],
               },
             },
           ],
@@ -3358,7 +3754,10 @@ export class Transformer {
               {
                 type: "functionCall",
                 name: "add",
-                args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }],
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "literal", value: 32n },
+                ],
               },
               {
                 type: "functionCall",
@@ -3382,7 +3781,10 @@ export class Transformer {
               {
                 type: "functionCall",
                 name: "add",
-                args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 64n }],
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "literal", value: 64n },
+                ],
               },
             ],
           },
@@ -3427,7 +3829,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "identifier", name: "ptr" }, { type: "identifier", name: "size" }],
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "identifier", name: "size" },
+            ],
           },
         },
         // calldatacopy(add(ptr, 32), 0, size)
@@ -3437,7 +3842,14 @@ export class Transformer {
             type: "functionCall",
             name: "calldatacopy",
             args: [
-              { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }] },
+              {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "literal", value: 32n },
+                ],
+              },
               { type: "literal", value: 0n },
               { type: "identifier", name: "size" },
             ],
@@ -3455,7 +3867,14 @@ export class Transformer {
                 type: "functionCall",
                 name: "add",
                 args: [
-                  { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }] },
+                  {
+                    type: "functionCall",
+                    name: "add",
+                    args: [
+                      { type: "identifier", name: "ptr" },
+                      { type: "literal", value: 32n },
+                    ],
+                  },
                   { type: "identifier", name: "size" },
                 ],
               },
@@ -3489,7 +3908,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 0n }],
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "literal", value: 0n },
+            ],
           },
         },
         // mstore(0x40, add(ptr, 32)) - update free memory pointer
@@ -3500,7 +3922,14 @@ export class Transformer {
             name: "mstore",
             args: [
               { type: "literal", value: 0x40n },
-              { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: 32n }] },
+              {
+                type: "functionCall",
+                name: "add",
+                args: [
+                  { type: "identifier", name: "ptr" },
+                  { type: "literal", value: 32n },
+                ],
+              },
             ],
           },
         },
@@ -3555,7 +3984,10 @@ export class Transformer {
               expr: {
                 type: "functionCall",
                 name: "revert",
-                args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }],
+                args: [
+                  { type: "literal", value: 0n },
+                  { type: "literal", value: 0n },
+                ],
               },
             },
           ],
@@ -3618,7 +4050,10 @@ export class Transformer {
               expr: {
                 type: "functionCall",
                 name: "revert",
-                args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }],
+                args: [
+                  { type: "literal", value: 0n },
+                  { type: "literal", value: 0n },
+                ],
               },
             },
           ],
@@ -3667,7 +4102,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "literal", value: 0n }, { type: "identifier", name: "hash" }],
+            args: [
+              { type: "literal", value: 0n },
+              { type: "identifier", name: "hash" },
+            ],
           },
         },
         // mstore(32, v)
@@ -3676,7 +4114,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "literal", value: 32n }, { type: "identifier", name: "v" }],
+            args: [
+              { type: "literal", value: 32n },
+              { type: "identifier", name: "v" },
+            ],
           },
         },
         // mstore(64, r)
@@ -3685,7 +4126,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "literal", value: 64n }, { type: "identifier", name: "r" }],
+            args: [
+              { type: "literal", value: 64n },
+              { type: "identifier", name: "r" },
+            ],
           },
         },
         // mstore(96, s)
@@ -3694,7 +4138,10 @@ export class Transformer {
           expr: {
             type: "functionCall",
             name: "mstore",
-            args: [{ type: "literal", value: 96n }, { type: "identifier", name: "s" }],
+            args: [
+              { type: "literal", value: 96n },
+              { type: "identifier", name: "s" },
+            ],
           },
         },
         // let success := staticcall(gas(), 1, 0, 128, 0, 32)
@@ -3728,7 +4175,10 @@ export class Transformer {
               expr: {
                 type: "functionCall",
                 name: "revert",
-                args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }],
+                args: [
+                  { type: "literal", value: 0n },
+                  { type: "literal", value: 0n },
+                ],
               },
             },
           ],
@@ -4365,7 +4815,10 @@ export class Transformer {
       expr: {
         type: "functionCall",
         name: "mstore",
-        args: [{ type: "literal", value: 0n }, { type: "literal", value: slot }],
+        args: [
+          { type: "literal", value: 0n },
+          { type: "literal", value: slot },
+        ],
       },
     });
 
@@ -4379,7 +4832,10 @@ export class Transformer {
           {
             type: "functionCall",
             name: "keccak256",
-            args: [{ type: "literal", value: 0n }, { type: "literal", value: 32n }],
+            args: [
+              { type: "literal", value: 0n },
+              { type: "literal", value: 32n },
+            ],
           },
           { type: "identifier", name: "_push_len" },
         ],
@@ -4407,7 +4863,10 @@ export class Transformer {
           {
             type: "functionCall",
             name: "add",
-            args: [{ type: "identifier", name: "_push_len" }, { type: "literal", value: 1n }],
+            args: [
+              { type: "identifier", name: "_push_len" },
+              { type: "literal", value: 1n },
+            ],
           },
         ],
       },
@@ -4444,7 +4903,10 @@ export class Transformer {
       value: {
         type: "functionCall",
         name: "sub",
-        args: [{ type: "identifier", name: "_pop_len" }, { type: "literal", value: 1n }],
+        args: [
+          { type: "identifier", name: "_pop_len" },
+          { type: "literal", value: 1n },
+        ],
       },
     });
 
@@ -4454,7 +4916,10 @@ export class Transformer {
       expr: {
         type: "functionCall",
         name: "mstore",
-        args: [{ type: "literal", value: 0n }, { type: "literal", value: slot }],
+        args: [
+          { type: "literal", value: 0n },
+          { type: "literal", value: slot },
+        ],
       },
     });
 
@@ -4468,7 +4933,10 @@ export class Transformer {
           {
             type: "functionCall",
             name: "keccak256",
-            args: [{ type: "literal", value: 0n }, { type: "literal", value: 32n }],
+            args: [
+              { type: "literal", value: 0n },
+              { type: "literal", value: 32n },
+            ],
           },
           { type: "identifier", name: "_pop_new_len" },
         ],
@@ -4481,7 +4949,10 @@ export class Transformer {
       expr: {
         type: "functionCall",
         name: "sstore",
-        args: [{ type: "identifier", name: "_pop_data_slot" }, { type: "literal", value: 0n }],
+        args: [
+          { type: "identifier", name: "_pop_data_slot" },
+          { type: "literal", value: 0n },
+        ],
       },
     });
 
@@ -4491,7 +4962,10 @@ export class Transformer {
       expr: {
         type: "functionCall",
         name: "sstore",
-        args: [{ type: "literal", value: slot }, { type: "identifier", name: "_pop_new_len" }],
+        args: [
+          { type: "literal", value: slot },
+          { type: "identifier", name: "_pop_new_len" },
+        ],
       },
     });
 
@@ -4534,9 +5008,7 @@ export class Transformer {
           condition: {
             type: "functionCall",
             name: "iszero",
-            args: [
-              { type: "functionCall", name: "calldatasize", args: [] },
-            ],
+            args: [{ type: "functionCall", name: "calldatasize", args: [] }],
           },
           body: [
             // Call receive function
@@ -4673,7 +5145,11 @@ export class Transformer {
             name: "add",
             args: [
               { type: "literal", value: 4n },
-              { type: "functionCall", name: "calldataload", args: [{ type: "literal", value: BigInt(4 + i * 32) }] },
+              {
+                type: "functionCall",
+                name: "calldataload",
+                args: [{ type: "literal", value: BigInt(4 + i * 32) }],
+              },
             ],
           },
         });
@@ -4837,14 +5313,18 @@ export class Transformer {
     for (const p of rawParams) {
       const paramName = p.getName();
       const typeName = p.getTypeNode()?.getText() ?? "u256";
-      const isDynamicArray = typeName.startsWith("CalldataArray<") ||
+      const isDynamicArray =
+        typeName.startsWith("CalldataArray<") ||
         (typeName.endsWith("[]") && !typeName.includes("StorageArray"));
 
       if (isDynamicArray) {
         // Expand to two params: offset and length
         params.push(`${paramName}_offset`);
         params.push(`${paramName}_len`);
-        this.calldataArrayParams.set(paramName, { offsetVar: `${paramName}_offset`, lenVar: `${paramName}_len` });
+        this.calldataArrayParams.set(paramName, {
+          offsetVar: `${paramName}_offset`,
+          lenVar: `${paramName}_len`,
+        });
       } else {
         params.push(paramName);
       }
@@ -4878,7 +5358,22 @@ export class Transformer {
     for (const decorator of method.getDecorators()) {
       const decoratorName = decorator.getName();
       // Skip built-in decorators
-      if (["storage", "payable", "view", "pure", "event", "immutable", "anonymous", "virtual", "override", "internal", "external", "constant"].includes(decoratorName)) {
+      if (
+        [
+          "storage",
+          "payable",
+          "view",
+          "pure",
+          "event",
+          "immutable",
+          "anonymous",
+          "virtual",
+          "override",
+          "internal",
+          "external",
+          "constant",
+        ].includes(decoratorName)
+      ) {
         continue;
       }
 
@@ -5096,8 +5591,13 @@ export class Transformer {
               if (Node.isPropertyAccessExpression(callExpr)) {
                 const obj = callExpr.getExpression();
                 const methodName = callExpr.getName();
-                if (Node.isIdentifier(obj) && obj.getText() === "call" &&
-                    (methodName === "call" || methodName === "staticcall" || methodName === "delegatecall")) {
+                if (
+                  Node.isIdentifier(obj) &&
+                  obj.getText() === "call" &&
+                  (methodName === "call" ||
+                    methodName === "staticcall" ||
+                    methodName === "delegatecall")
+                ) {
                   // Found the external call
                   foundCall = true;
                   callResultVarName = decl.getName();
@@ -5132,8 +5632,13 @@ export class Transformer {
             if (Node.isPropertyAccessExpression(callExpr)) {
               const obj = callExpr.getExpression();
               const methodName = callExpr.getName();
-              if (Node.isIdentifier(obj) && obj.getText() === "call" &&
-                  (methodName === "call" || methodName === "staticcall" || methodName === "delegatecall")) {
+              if (
+                Node.isIdentifier(obj) &&
+                obj.getText() === "call" &&
+                (methodName === "call" ||
+                  methodName === "staticcall" ||
+                  methodName === "delegatecall")
+              ) {
                 // Found the external call (no result capture)
                 foundCall = true;
                 const callStmts = this.generateTryExternalCall(
@@ -5172,7 +5677,9 @@ export class Transformer {
     }
 
     if (!foundCall) {
-      throw new Error("try block must contain an external call (call.call, call.staticcall, or call.delegatecall)");
+      throw new Error(
+        "try block must contain an external call (call.call, call.staticcall, or call.delegatecall)"
+      );
     }
 
     // Add the call statements
@@ -5286,10 +5793,7 @@ export class Transformer {
         expr: {
           type: "functionCall",
           name: "mstore",
-          args: [
-            { type: "literal", value: BigInt(4 + i * 32) },
-            callArgs[i]!,
-          ],
+          args: [{ type: "literal", value: BigInt(4 + i * 32) }, callArgs[i]!],
         },
       });
     }
@@ -5302,10 +5806,7 @@ export class Transformer {
     // or staticcall(gas(), target, 0, inputSize, 0, 32)
     // or delegatecall(gas(), target, 0, inputSize, 0, 32)
     const callBuiltin = callType;
-    const callExprArgs: YulExpression[] = [
-      { type: "functionCall", name: "gas", args: [] },
-      target,
-    ];
+    const callExprArgs: YulExpression[] = [{ type: "functionCall", name: "gas", args: [] }, target];
 
     if (callType === "call") {
       callExprArgs.push({ type: "literal", value: 0n }); // value (0 for non-payable)
@@ -5456,7 +5957,9 @@ export class Transformer {
     if (incrementor) {
       // Handle i++ and ++i specially - need to assign back
       if (Node.isPostfixUnaryExpression(incrementor) || Node.isPrefixUnaryExpression(incrementor)) {
-        const unaryNode = incrementor as import("ts-morph").PostfixUnaryExpression | import("ts-morph").PrefixUnaryExpression;
+        const unaryNode = incrementor as
+          | import("ts-morph").PostfixUnaryExpression
+          | import("ts-morph").PrefixUnaryExpression;
         const operand = unaryNode.getOperand();
         const operator = unaryNode.getOperatorToken();
 
@@ -5469,7 +5972,10 @@ export class Transformer {
               value: {
                 type: "functionCall",
                 name: "add",
-                args: [{ type: "identifier", name: varName }, { type: "literal", value: 1n }],
+                args: [
+                  { type: "identifier", name: varName },
+                  { type: "literal", value: 1n },
+                ],
               },
             });
           } else if (operator === SyntaxKind.MinusMinusToken) {
@@ -5479,7 +5985,10 @@ export class Transformer {
               value: {
                 type: "functionCall",
                 name: "sub",
-                args: [{ type: "identifier", name: varName }, { type: "literal", value: 1n }],
+                args: [
+                  { type: "identifier", name: varName },
+                  { type: "literal", value: 1n },
+                ],
               },
             });
           }
@@ -5509,7 +6018,12 @@ export class Transformer {
           if (Node.isIdentifier(leftExpr)) {
             const varName = leftExpr.getText();
             const baseOp = opToken[0] as "+" | "-" | "*" | "/"; // '+', '-', '*', '/'
-            const opMap: Record<"+" | "-" | "*" | "/", string> = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
+            const opMap: Record<"+" | "-" | "*" | "/", string> = {
+              "+": "add",
+              "-": "sub",
+              "*": "mul",
+              "/": "div",
+            };
             const yulOp = opMap[baseOp];
             post.push({
               type: "assignment",
@@ -5682,7 +6196,9 @@ export class Transformer {
     return statements;
   }
 
-  private transformExpressionStatement(node: ExpressionStatement): YulStatement | YulStatement[] | null {
+  private transformExpressionStatement(
+    node: ExpressionStatement
+  ): YulStatement | YulStatement[] | null {
     const expr = node.getExpression();
 
     // Handle unchecked(() => { ... }) blocks
@@ -5696,7 +6212,9 @@ export class Transformer {
             // Transform the block statements directly
             // ts-to-yul doesn't add overflow checks, so unchecked is a no-op
             const statements = this.transformBlock(body);
-            return statements.length === 1 && statements[0] ? statements[0] : { type: "block", statements };
+            return statements.length === 1 && statements[0]
+              ? statements[0]
+              : { type: "block", statements };
           } else {
             // Expression body
             return { type: "expression", expr: this.transformExpression(body) };
@@ -5789,11 +6307,7 @@ export class Transformer {
                   expr: {
                     type: "functionCall",
                     name: "__bytes_store",
-                    args: [
-                      { type: "literal", value: storageInfo.slot },
-                      indexExpr,
-                      valueExpr,
-                    ],
+                    args: [{ type: "literal", value: storageInfo.slot }, indexExpr, valueExpr],
                   },
                 };
               }
@@ -5834,7 +6348,11 @@ export class Transformer {
 
                 // For packed storage:
                 // sstore(slot, or(and(sload(slot), not(shl(offset, mask))), shl(offset, and(value, mask))))
-                const sloadExpr: YulExpression = { type: "functionCall", name: loadOp, args: [slotExpr] };
+                const sloadExpr: YulExpression = {
+                  type: "functionCall",
+                  name: loadOp,
+                  args: [slotExpr],
+                };
 
                 // Mask the value to ensure it fits
                 const maskedValue: YulExpression = {
@@ -5844,29 +6362,31 @@ export class Transformer {
                 };
 
                 // Shift the value to the correct position
-                const shiftedValue: YulExpression = bitOffset === 0
-                  ? maskedValue
-                  : {
-                      type: "functionCall",
-                      name: "shl",
-                      args: [{ type: "literal", value: BigInt(bitOffset) }, maskedValue],
-                    };
+                const shiftedValue: YulExpression =
+                  bitOffset === 0
+                    ? maskedValue
+                    : {
+                        type: "functionCall",
+                        name: "shl",
+                        args: [{ type: "literal", value: BigInt(bitOffset) }, maskedValue],
+                      };
 
                 // Clear the bits in the slot
-                const shiftedMask: YulExpression = bitOffset === 0
-                  ? { type: "literal", value: mask }
-                  : {
-                      type: "functionCall",
-                      name: "shl",
-                      args: [{ type: "literal", value: BigInt(bitOffset) }, { type: "literal", value: mask }],
-                    };
+                const shiftedMask: YulExpression =
+                  bitOffset === 0
+                    ? { type: "literal", value: mask }
+                    : {
+                        type: "functionCall",
+                        name: "shl",
+                        args: [
+                          { type: "literal", value: BigInt(bitOffset) },
+                          { type: "literal", value: mask },
+                        ],
+                      };
                 const clearedSlot: YulExpression = {
                   type: "functionCall",
                   name: "and",
-                  args: [
-                    sloadExpr,
-                    { type: "functionCall", name: "not", args: [shiftedMask] },
-                  ],
+                  args: [sloadExpr, { type: "functionCall", name: "not", args: [shiftedMask] }],
                 };
 
                 // Combine cleared slot with new value
@@ -5974,10 +6494,10 @@ export class Transformer {
                   const fieldInfo = storageInfo.mappingValueStruct.fields.get(fieldName);
                   if (fieldInfo) {
                     const keyYul = this.transformExpression(keyExpr);
-                    const baseSlot = this.generateMappingSlotHash(
-                      keyYul,
-                      { type: "literal", value: storageInfo.slot }
-                    );
+                    const baseSlot = this.generateMappingSlotHash(keyYul, {
+                      type: "literal",
+                      value: storageInfo.slot,
+                    });
 
                     const slotExpr: YulExpression =
                       fieldInfo.offset === 0n
@@ -6227,7 +6747,10 @@ export class Transformer {
             expr: {
               type: "functionCall",
               name: storeOp,
-              args: [{ type: "literal", value: storageInfo.slot }, { type: "literal", value: 0n }],
+              args: [
+                { type: "literal", value: storageInfo.slot },
+                { type: "literal", value: 0n },
+              ],
             },
           };
         }
@@ -6603,10 +7126,7 @@ export class Transformer {
         expr: {
           type: "functionCall",
           name: "mstore",
-          args: [
-            { type: "literal", value: offset },
-            value ?? { type: "literal", value: 0n },
-          ],
+          args: [{ type: "literal", value: offset }, value ?? { type: "literal", value: 0n }],
         },
       });
       dataSize = offset + 32n;
@@ -7017,11 +7537,7 @@ export class Transformer {
     return {
       type: "functionCall",
       name: "__fixed_array_slot",
-      args: [
-        { type: "literal", value: slot },
-        index,
-        { type: "literal", value: size },
-      ],
+      args: [{ type: "literal", value: slot }, index, { type: "literal", value: size }],
     };
   }
 
@@ -7273,10 +7789,7 @@ export class Transformer {
         expr: {
           type: "functionCall",
           name: "mstore",
-          args: [
-            { type: "literal", value: offset },
-            argExpr,
-          ],
+          args: [{ type: "literal", value: offset }, argExpr],
         },
       });
     }
@@ -7548,12 +8061,21 @@ export class Transformer {
         }
 
         // Handle arr.length for fixed arrays: compile-time constant
-        if (storageInfo && storageInfo.isFixedArray && storageInfo.fixedArraySize && propName === "length") {
+        if (
+          storageInfo &&
+          storageInfo.isFixedArray &&
+          storageInfo.fixedArraySize &&
+          propName === "length"
+        ) {
           return { type: "literal", value: storageInfo.fixedArraySize };
         }
 
         // Handle dynamic bytes/string .length: this.data.length -> sload(slot)
-        if (storageInfo && (storageInfo.isDynamicBytes || storageInfo.isDynamicString) && propName === "length") {
+        if (
+          storageInfo &&
+          (storageInfo.isDynamicBytes || storageInfo.isDynamicString) &&
+          propName === "length"
+        ) {
           return {
             type: "functionCall",
             name: this.getLoadOp(storageInfo),
@@ -7613,10 +8135,10 @@ export class Transformer {
             const fieldInfo = storageInfo.mappingValueStruct.fields.get(propName);
             if (fieldInfo) {
               const keyYul = this.transformExpression(keyExpr);
-              const baseSlot = this.generateMappingSlotHash(
-                keyYul,
-                { type: "literal", value: storageInfo.slot }
-              );
+              const baseSlot = this.generateMappingSlotHash(keyYul, {
+                type: "literal",
+                value: storageInfo.slot,
+              });
 
               const slotExpr: YulExpression =
                 fieldInfo.offset === 0n
@@ -7895,7 +8417,10 @@ export class Transformer {
 
         if (rawArgs.length === 1 && Node.isObjectLiteralExpression(rawArgs[0])) {
           // Try to resolve named parameters
-          const namedArgs = this.resolveNamedParameters(methodName, rawArgs[0] as ObjectLiteralExpression);
+          const namedArgs = this.resolveNamedParameters(
+            methodName,
+            rawArgs[0] as ObjectLiteralExpression
+          );
           if (namedArgs) {
             args = namedArgs;
           } else {
@@ -8042,9 +8567,10 @@ export class Transformer {
           }
           const startExpr = this.transformExpression(args[0]!);
           // If end is not provided, use the full length
-          const endExpr = args.length === 2
-            ? this.transformExpression(args[1]!)
-            : { type: "identifier" as const, name: calldataInfo.lenVar };
+          const endExpr =
+            args.length === 2
+              ? this.transformExpression(args[1]!)
+              : { type: "identifier" as const, name: calldataInfo.lenVar };
 
           // Slice returns (new_offset, new_len)
           // new_offset = arr_offset + start * 32
@@ -8130,11 +8656,7 @@ export class Transformer {
               const callArgs = node.getArguments().map((a) => this.transformExpression(a));
 
               // Generate typed external call using the method signature
-              return this.generateTypedExternalCall(
-                targetAddr,
-                methodInfo,
-                callArgs
-              );
+              return this.generateTypedExternalCall(targetAddr, methodInfo, callArgs);
             }
           }
         }
@@ -8159,7 +8681,10 @@ export class Transformer {
    * call.call(target, "signature", [args]) -> CALL
    * call.staticcall(target, "signature", [args]) -> STATICCALL
    */
-  private transformExternalCall(node: CallExpression, callType: "call" | "staticcall"): YulExpression {
+  private transformExternalCall(
+    node: CallExpression,
+    callType: "call" | "staticcall"
+  ): YulExpression {
     const args = node.getArguments();
     if (args.length < 2) {
       throw new Error(`${callType} requires at least 2 arguments: target and signature`);
@@ -8316,7 +8841,11 @@ export class Transformer {
 
     // Load the stored function reference
     const slotExpr: YulExpression = { type: "literal", value: storageInfo.slot };
-    const storedValue: YulExpression = { type: "functionCall", name: this.getLoadOp(storageInfo), args: [slotExpr] };
+    const storedValue: YulExpression = {
+      type: "functionCall",
+      name: this.getLoadOp(storageInfo),
+      args: [slotExpr],
+    };
 
     // Extract address (lower 160 bits)
     const addressExpr: YulExpression = {
@@ -8330,7 +8859,11 @@ export class Transformer {
       type: "functionCall",
       name: "and",
       args: [
-        { type: "functionCall", name: "shr", args: [{ type: "literal", value: 160n }, storedValue] },
+        {
+          type: "functionCall",
+          name: "shr",
+          args: [{ type: "literal", value: 160n }, storedValue],
+        },
         { type: "literal", value: 0xffffffffn },
       ],
     };
@@ -8561,7 +9094,14 @@ export class Transformer {
           type: "functionCall",
           name: "mstore",
           args: [
-            { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(i * 32) }] },
+            {
+              type: "functionCall",
+              name: "add",
+              args: [
+                { type: "identifier", name: "ptr" },
+                { type: "literal", value: BigInt(i * 32) },
+              ],
+            },
             { type: "identifier", name: `arg${i}` },
           ],
         },
@@ -8576,7 +9116,14 @@ export class Transformer {
         name: "mstore",
         args: [
           { type: "literal", value: 0x40n },
-          { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(n * 32) }] },
+          {
+            type: "functionCall",
+            name: "add",
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "literal", value: BigInt(n * 32) },
+            ],
+          },
         ],
       },
     });
@@ -8612,7 +9159,14 @@ export class Transformer {
           type: "functionCall",
           name: "mstore",
           args: [
-            { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(i * 32) }] },
+            {
+              type: "functionCall",
+              name: "add",
+              args: [
+                { type: "identifier", name: "ptr" },
+                { type: "literal", value: BigInt(i * 32) },
+              ],
+            },
             { type: "identifier", name: `arg${i}` },
           ],
         },
@@ -8626,7 +9180,14 @@ export class Transformer {
         name: "mstore",
         args: [
           { type: "literal", value: 0x40n },
-          { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(n * 32) }] },
+          {
+            type: "functionCall",
+            name: "add",
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "literal", value: BigInt(n * 32) },
+            ],
+          },
         ],
       },
     });
@@ -8661,7 +9222,14 @@ export class Transformer {
           name: "mstore",
           args: [
             { type: "identifier", name: "ptr" },
-            { type: "functionCall", name: "shl", args: [{ type: "literal", value: 224n }, { type: "identifier", name: "selector" }] },
+            {
+              type: "functionCall",
+              name: "shl",
+              args: [
+                { type: "literal", value: 224n },
+                { type: "identifier", name: "selector" },
+              ],
+            },
           ],
         },
       },
@@ -8675,7 +9243,14 @@ export class Transformer {
           type: "functionCall",
           name: "mstore",
           args: [
-            { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(4 + i * 32) }] },
+            {
+              type: "functionCall",
+              name: "add",
+              args: [
+                { type: "identifier", name: "ptr" },
+                { type: "literal", value: BigInt(4 + i * 32) },
+              ],
+            },
             { type: "identifier", name: `arg${i}` },
           ],
         },
@@ -8690,7 +9265,14 @@ export class Transformer {
         name: "mstore",
         args: [
           { type: "literal", value: 0x40n },
-          { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(4 + n * 32) }] },
+          {
+            type: "functionCall",
+            name: "add",
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "literal", value: BigInt(4 + n * 32) },
+            ],
+          },
         ],
       },
     });
@@ -8722,7 +9304,14 @@ export class Transformer {
           type: "functionCall",
           name: "mload",
           args: [
-            { type: "functionCall", name: "add", args: [{ type: "identifier", name: "data" }, { type: "literal", value: BigInt(i * 32) }] },
+            {
+              type: "functionCall",
+              name: "add",
+              args: [
+                { type: "identifier", name: "data" },
+                { type: "literal", value: BigInt(i * 32) },
+              ],
+            },
           ],
         },
       });
@@ -8753,7 +9342,14 @@ export class Transformer {
           name: "mstore",
           args: [
             { type: "literal", value: 0n },
-            { type: "functionCall", name: "shl", args: [{ type: "literal", value: 224n }, { type: "identifier", name: "selector" }] },
+            {
+              type: "functionCall",
+              name: "shl",
+              args: [
+                { type: "literal", value: 224n },
+                { type: "identifier", name: "selector" },
+              ],
+            },
           ],
         },
       },
@@ -8795,8 +9391,24 @@ export class Transformer {
     // if iszero(success) { revert(0, 0) }
     body.push({
       type: "if",
-      condition: { type: "functionCall", name: "iszero", args: [{ type: "identifier", name: "success" }] },
-      body: [{ type: "expression", expr: { type: "functionCall", name: "revert", args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }] } }],
+      condition: {
+        type: "functionCall",
+        name: "iszero",
+        args: [{ type: "identifier", name: "success" }],
+      },
+      body: [
+        {
+          type: "expression",
+          expr: {
+            type: "functionCall",
+            name: "revert",
+            args: [
+              { type: "literal", value: 0n },
+              { type: "literal", value: 0n },
+            ],
+          },
+        },
+      ],
     });
 
     // result := mload(0)
@@ -8831,7 +9443,14 @@ export class Transformer {
           name: "mstore",
           args: [
             { type: "literal", value: 0n },
-            { type: "functionCall", name: "shl", args: [{ type: "literal", value: 224n }, { type: "identifier", name: "selector" }] },
+            {
+              type: "functionCall",
+              name: "shl",
+              args: [
+                { type: "literal", value: 224n },
+                { type: "identifier", name: "selector" },
+              ],
+            },
           ],
         },
       },
@@ -8896,7 +9515,14 @@ export class Transformer {
           name: "mstore",
           args: [
             { type: "literal", value: 0n },
-            { type: "functionCall", name: "shl", args: [{ type: "literal", value: 224n }, { type: "identifier", name: "selector" }] },
+            {
+              type: "functionCall",
+              name: "shl",
+              args: [
+                { type: "literal", value: 224n },
+                { type: "identifier", name: "selector" },
+              ],
+            },
           ],
         },
       },
@@ -8938,8 +9564,24 @@ export class Transformer {
     // if iszero(success) { revert(0, 0) }
     body.push({
       type: "if",
-      condition: { type: "functionCall", name: "iszero", args: [{ type: "identifier", name: "success" }] },
-      body: [{ type: "expression", expr: { type: "functionCall", name: "revert", args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }] } }],
+      condition: {
+        type: "functionCall",
+        name: "iszero",
+        args: [{ type: "identifier", name: "success" }],
+      },
+      body: [
+        {
+          type: "expression",
+          expr: {
+            type: "functionCall",
+            name: "revert",
+            args: [
+              { type: "literal", value: 0n },
+              { type: "literal", value: 0n },
+            ],
+          },
+        },
+      ],
     });
 
     // result := mload(0)
@@ -8999,7 +9641,14 @@ export class Transformer {
               name: "add",
               args: [
                 { type: "identifier", name: "ptr" },
-                { type: "functionCall", name: "add", args: [{ type: "identifier", name: "size" }, { type: "literal", value: BigInt(i * 32) }] },
+                {
+                  type: "functionCall",
+                  name: "add",
+                  args: [
+                    { type: "identifier", name: "size" },
+                    { type: "literal", value: BigInt(i * 32) },
+                  ],
+                },
               ],
             },
             { type: "identifier", name: `arg${i}` },
@@ -9015,7 +9664,10 @@ export class Transformer {
       value: {
         type: "functionCall",
         name: "add",
-        args: [{ type: "identifier", name: "size" }, { type: "literal", value: BigInt(n * 32) }],
+        args: [
+          { type: "identifier", name: "size" },
+          { type: "literal", value: BigInt(n * 32) },
+        ],
       },
     });
 
@@ -9037,8 +9689,24 @@ export class Transformer {
     // if iszero(addr) { revert(0, 0) }
     body.push({
       type: "if",
-      condition: { type: "functionCall", name: "iszero", args: [{ type: "identifier", name: "addr" }] },
-      body: [{ type: "expression", expr: { type: "functionCall", name: "revert", args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }] } }],
+      condition: {
+        type: "functionCall",
+        name: "iszero",
+        args: [{ type: "identifier", name: "addr" }],
+      },
+      body: [
+        {
+          type: "expression",
+          expr: {
+            type: "functionCall",
+            name: "revert",
+            args: [
+              { type: "literal", value: 0n },
+              { type: "literal", value: 0n },
+            ],
+          },
+        },
+      ],
     });
 
     return {
@@ -9091,7 +9759,14 @@ export class Transformer {
               name: "add",
               args: [
                 { type: "identifier", name: "ptr" },
-                { type: "functionCall", name: "add", args: [{ type: "identifier", name: "size" }, { type: "literal", value: BigInt(i * 32) }] },
+                {
+                  type: "functionCall",
+                  name: "add",
+                  args: [
+                    { type: "identifier", name: "size" },
+                    { type: "literal", value: BigInt(i * 32) },
+                  ],
+                },
               ],
             },
             { type: "identifier", name: `arg${i}` },
@@ -9107,7 +9782,10 @@ export class Transformer {
       value: {
         type: "functionCall",
         name: "add",
-        args: [{ type: "identifier", name: "size" }, { type: "literal", value: BigInt(n * 32) }],
+        args: [
+          { type: "identifier", name: "size" },
+          { type: "literal", value: BigInt(n * 32) },
+        ],
       },
     });
 
@@ -9130,8 +9808,24 @@ export class Transformer {
     // if iszero(addr) { revert(0, 0) }
     body.push({
       type: "if",
-      condition: { type: "functionCall", name: "iszero", args: [{ type: "identifier", name: "addr" }] },
-      body: [{ type: "expression", expr: { type: "functionCall", name: "revert", args: [{ type: "literal", value: 0n }, { type: "literal", value: 0n }] } }],
+      condition: {
+        type: "functionCall",
+        name: "iszero",
+        args: [{ type: "identifier", name: "addr" }],
+      },
+      body: [
+        {
+          type: "expression",
+          expr: {
+            type: "functionCall",
+            name: "revert",
+            args: [
+              { type: "literal", value: 0n },
+              { type: "literal", value: 0n },
+            ],
+          },
+        },
+      ],
     });
 
     return {
@@ -9214,9 +9908,10 @@ export class Transformer {
 
     // Get call arguments
     const callArgs = args.slice(2);
-    const argExprs = callArgs.length > 0 && Node.isArrayLiteralExpression(callArgs[0]!)
-      ? callArgs[0]!.getElements().map((e) => this.transformExpression(e))
-      : callArgs.map((a) => this.transformExpression(a));
+    const argExprs =
+      callArgs.length > 0 && Node.isArrayLiteralExpression(callArgs[0]!)
+        ? callArgs[0]!.getElements().map((e) => this.transformExpression(e))
+        : callArgs.map((a) => this.transformExpression(a));
 
     // Generate dynamic helper for N arguments
     const n = argExprs.length;
@@ -9282,7 +9977,10 @@ export class Transformer {
         expr: {
           type: "functionCall",
           name: "mstore",
-          args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(n * 32) }],
+          args: [
+            { type: "identifier", name: "ptr" },
+            { type: "literal", value: BigInt(n * 32) },
+          ],
         },
       },
     ];
@@ -9295,7 +9993,14 @@ export class Transformer {
           type: "functionCall",
           name: "mstore",
           args: [
-            { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(32 + i * 32) }] },
+            {
+              type: "functionCall",
+              name: "add",
+              args: [
+                { type: "identifier", name: "ptr" },
+                { type: "literal", value: BigInt(32 + i * 32) },
+              ],
+            },
             { type: "identifier", name: `arg${i}` },
           ],
         },
@@ -9310,7 +10015,14 @@ export class Transformer {
         name: "mstore",
         args: [
           { type: "literal", value: 0x40n },
-          { type: "functionCall", name: "add", args: [{ type: "identifier", name: "ptr" }, { type: "literal", value: BigInt(32 + n * 32) }] },
+          {
+            type: "functionCall",
+            name: "add",
+            args: [
+              { type: "identifier", name: "ptr" },
+              { type: "literal", value: BigInt(32 + n * 32) },
+            ],
+          },
         ],
       },
     });
@@ -9398,8 +10110,16 @@ export class Transformer {
         type: "functionCall",
         name: `__create2_${n}`,
         args: [
-          { type: "functionCall", name: "dataoffset", args: [{ type: "stringLiteral", value: name }] },
-          { type: "functionCall", name: "datasize", args: [{ type: "stringLiteral", value: name }] },
+          {
+            type: "functionCall",
+            name: "dataoffset",
+            args: [{ type: "stringLiteral", value: name }],
+          },
+          {
+            type: "functionCall",
+            name: "datasize",
+            args: [{ type: "stringLiteral", value: name }],
+          },
           saltExpr,
           ...args,
         ],
@@ -9417,7 +10137,11 @@ export class Transformer {
       type: "functionCall",
       name: `__create_${n}`,
       args: [
-        { type: "functionCall", name: "dataoffset", args: [{ type: "stringLiteral", value: name }] },
+        {
+          type: "functionCall",
+          name: "dataoffset",
+          args: [{ type: "stringLiteral", value: name }],
+        },
         { type: "functionCall", name: "datasize", args: [{ type: "stringLiteral", value: name }] },
         ...args,
       ],
@@ -9430,7 +10154,8 @@ export class Transformer {
     const operator = node.getOperatorToken().getText();
 
     // Check if either operand is a signed type for comparison operators
-    const isSignedComparison = this.isSignedType(node.getLeft()) || this.isSignedType(node.getRight());
+    const isSignedComparison =
+      this.isSignedType(node.getLeft()) || this.isSignedType(node.getRight());
 
     const opMap: Record<string, string> = {
       "+": "add",
@@ -9913,7 +10638,9 @@ export class Transformer {
         return `${expr.name}(${args})`;
       }
       default:
-        throw new Error(`Unsupported expression type for string conversion: ${(expr as YulExpression).type}`);
+        throw new Error(
+          `Unsupported expression type for string conversion: ${(expr as YulExpression).type}`
+        );
     }
   }
 }
